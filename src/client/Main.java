@@ -1,5 +1,7 @@
 package client;
 
+import java.awt.EventQueue;
+
 import client.log.Login;
 
 /**
@@ -13,13 +15,19 @@ public class Main {
 	/**
 	 * 客户端的程序入口函数
 	 * @param args 并不需要的参数列表
-	 */
-	
+	 */	  
 	  public static void main(String[] args) {
-		  Login login = new Login();
-		  login.setVisible(true);
-	  
-	  }
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						Login login = new Login();
+						  login.setVisible(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
 	 
 
 }
