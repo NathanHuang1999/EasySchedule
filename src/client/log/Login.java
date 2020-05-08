@@ -13,6 +13,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import client.socket.SocketBase;
+import share.LoginFeedback;
+import share.User;
 
 /**
  * 用于处理登录事务的类，包含UI和逻辑
@@ -77,18 +79,19 @@ public class Login extends JFrame {
 				int port = Integer.parseInt(portString);
 				String account = accountField.getText();
 				String password = String.valueOf(passwordField.getPassword());
-				byte[] loginMsg = (account + " " + password).getBytes();
+				/**
+				 * 试图与服务器建立连接，并发送登录请求
+				 */
+				User user = new User(account, password);
 				socket = new SocketBase(port);
-				socket.sendData(loginMsg);
-				byte[] recvByte = socket.recvData();
-				String recvMsg = new String(recvByte, 0, recvByte.length);
-				int sep = recvMsg.indexOf(' ');
-				if(sep == -1) {
-					permission = recvMsg;
-				}else {
-					permission = recvMsg.substring(0, sep);
-					authority = recvMsg.substring(sep+1);
-				}
+				socket.sendData(user);
+				/**
+				 * 获取服务器的反馈
+				 */
+				LoginFeedback loginFeedback = (LoginFeedback) socket.recvDataObj();				
+				//TODO 对登录许可的判断和后续处理
+				
+				
 			}
 		});
 		loginButton.setFont(new Font("SansSerif", Font.BOLD, 16));
