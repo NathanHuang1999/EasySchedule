@@ -21,7 +21,7 @@ public class Main {
 				public void run() {
 					try {
 						Login login = new Login();
-						  login.setVisible(true);
+						login.setVisible(true);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
