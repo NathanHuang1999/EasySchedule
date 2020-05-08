@@ -102,6 +102,10 @@ public class SocketBase {
 		return inBuffer;
 	}
 	
+	/**
+	 * 关闭socket
+	 * @return 若关闭正常返回0,否则返回1
+	 */
 	public int closeSocket() {
 		int cond = 0;
 		try {

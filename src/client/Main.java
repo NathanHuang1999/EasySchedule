@@ -3,11 +3,12 @@ package client;
 import java.awt.EventQueue;
 
 import client.log.Login;
+import client.ui.FrameLogin;
 
 /**
  * 客户端的程序入口类
  * @author huang
- * @date 2020-05-06
+ * @date 2020-05-08
  * 
  */
 public class Main {
@@ -20,7 +21,7 @@ public class Main {
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
 					try {
-						Login login = new Login();
+						FrameLogin login = new FrameLogin();
 						login.setVisible(true);
 					} catch (Exception e) {
 						e.printStackTrace();
