@@ -14,7 +14,7 @@ import share.User;
 /**
  * 服务器的程序入口类
  * @author huang
- * @date 2020-05-07
+ * @date 2020-05-10
  * 
  */
 public class Main {
@@ -53,7 +53,7 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}     
-	    LoginFeedback loginFeedback = new LoginFeedback(false, null);
+	    LoginFeedback loginFeedback = new LoginFeedback();
         os.writeObject(loginFeedback);
         os.flush();
         

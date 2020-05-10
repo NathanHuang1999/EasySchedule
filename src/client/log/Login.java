@@ -1,25 +1,28 @@
 package client.log;
 
 import client.socket.SocketBase;
+import client.ui.FrameMain;
 import share.LoginFeedback;
 import share.User;
 
 /**
  * 用于处理登录事务的逻辑类
  * @author huang
- * @date 2020-05-08
+ * @date 2020-05-10
  *
  */
 public class Login {
 	
 	private SocketBase socket;
-	private String permission;
+	private String errorMsg;
 	private String authorityCode;
+	private FrameMain frameMain;
 	
 	public Login() {
 		socket = null;
-		permission = null;
+		errorMsg = null;
 		authorityCode = null;
+		frameMain = null;
 	}
 	
 	public int login(int port, String account, String password) {
@@ -31,18 +34,28 @@ public class Login {
 		socket = new SocketBase(port);
 		socket.sendData(user);
 		/**
-		 * 获取服务器的反馈
+		 * 获取服务器的反馈信息并处理
 		 */
 		LoginFeedback loginFeedback = (LoginFeedback) socket.recvDataObj();				
-		//TODO 对登录许可的判断和后续处理
-		System.out.println(loginFeedback.getPermission());
-		System.out.println(loginFeedback.getAuthorityCode());
-		
+		if(loginFeedback.getPermission()) {
+			frameMain = new FrameMain(socket ,loginFeedback.getAuthorityCode());
+		}else {
+			errorMsg = loginFeedback.getErrorMsg();
+			cond = 1;
+		}
 		return cond;
 	}
 	
 	public SocketBase getSocket() {
 		return socket;
+	}
+	
+	public FrameMain getFrameMain() {
+		return frameMain;
+	}
+	
+	public String getErrorMsg() {
+		return errorMsg;
 	}
 	
 	public String getAuthorityCode() {

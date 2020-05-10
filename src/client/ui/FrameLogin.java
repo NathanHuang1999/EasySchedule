@@ -14,11 +14,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import client.log.Login;
+import java.awt.Color;
 
 /**
  * 用于处理登录事务的UI类
  * @author huang
- * @date 2020-05-08
+ * @date 2020-05-10
  *
  */
 public class FrameLogin extends JFrame {
@@ -32,6 +33,7 @@ public class FrameLogin extends JFrame {
 	private JTextField portField;
 	private JLabel userImgLabel;
 	private Login loginController;
+	private JLabel msgLabel;
 
 	/**
 	 * 创建窗口
@@ -48,6 +50,7 @@ public class FrameLogin extends JFrame {
 		setLoginButton();
 		setExitButton();
 		setUserImgLabel();
+		setErrorMsgLabel();
 		loginController = new Login();
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -69,7 +72,16 @@ public class FrameLogin extends JFrame {
 				int port = Integer.parseInt(portString);
 				String account = accountField.getText();
 				String password = String.valueOf(passwordField.getPassword());
-				loginController.login(port, account, password);
+				msgLabel.setForeground(Color.BLUE);
+				msgLabel.setText("正在连接服务器，请稍候");
+				int cond = loginController.login(port, account, password);
+				if(cond==0) {
+					setVisible(false);
+					loginController.getFrameMain().setVisible(true);
+				}else if(cond==1) {
+					msgLabel.setForeground(Color.RED);
+					msgLabel.setText(loginController.getErrorMsg());
+				}
 			}
 		});
 		loginButton.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -113,13 +125,13 @@ public class FrameLogin extends JFrame {
 	private void setAccountLabel() {
 		JLabel accountLabel = new JLabel("账户");
 		accountLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-		accountLabel.setBounds(113, 200, 51, 36);
+		accountLabel.setBounds(113, 193, 51, 36);
 		contentPane.add(accountLabel);
 	}
 	
 	private void setAccountField() {
 		accountField = new JTextField();
-		accountField.setBounds(170, 202, 180, 30);
+		accountField.setBounds(170, 195, 180, 30);
 		contentPane.add(accountField);
 		accountField.setColumns(10);
 	}
@@ -127,13 +139,13 @@ public class FrameLogin extends JFrame {
 	private void setPasswordLabel() {
 		JLabel passwordLabel = new JLabel("密码");
 		passwordLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-		passwordLabel.setBounds(113, 255, 59, 18);
+		passwordLabel.setBounds(113, 240, 59, 18);
 		contentPane.add(passwordLabel);
 	}
 	
 	private void setPasswordField() {
 		passwordField = new JPasswordField();
-		passwordField.setBounds(170, 250, 180, 30);
+		passwordField.setBounds(170, 235, 180, 30);
 		contentPane.add(passwordField);
 	}
 	
@@ -149,4 +161,9 @@ public class FrameLogin extends JFrame {
 		contentPane.add(exitButton);
 	}
 	
+	private void setErrorMsgLabel() {
+		msgLabel = new JLabel("");
+		msgLabel.setBounds(170, 265, 180, 18);
+		contentPane.add(msgLabel);
+	}
 }

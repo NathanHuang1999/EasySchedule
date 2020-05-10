@@ -6,6 +6,9 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import client.socket.SocketBase;
+
 import javax.swing.JPopupMenu;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
@@ -24,28 +27,17 @@ import java.awt.event.ActionEvent;
  */
 public class FrameMain extends JFrame {
 
-	private JPanel contentPane;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					FrameMain frame = new FrameMain();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
+	private SocketBase socket = null;
+	private String authorityCode = null;
+	
 	/**
 	 * Create the frame.
 	 */
-	public FrameMain() {
+	public FrameMain(SocketBase socket, String authorityCode) {
+		
+		this.socket = socket;
+		this.authorityCode = authorityCode;
+		
 		setTitle("易排课客户端");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -96,10 +88,6 @@ public class FrameMain extends JFrame {
 		
 		JMenuItem menuItemAbout = new JMenuItem("关于");
 		menuHelp.add(menuItemAbout);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
 	}
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
