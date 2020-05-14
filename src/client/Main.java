@@ -2,7 +2,7 @@ package client;
 
 import java.awt.EventQueue;
 
-import client.log.Login;
+import client.uiLogic.log.LogicLogin;
 import client.ui.FrameLogin;
 
 /**

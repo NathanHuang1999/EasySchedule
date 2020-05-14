@@ -1,4 +1,4 @@
-package client.log;
+package client.uiLogic.log;
 
 import client.socket.SocketBase;
 import client.ui.FrameMain;
@@ -11,14 +11,14 @@ import share.User;
  * @date 2020-05-10
  *
  */
-public class Login {
+public class LogicLogin {
 	
 	private SocketBase socket;
 	private String errorMsg;
 	private String authorityCode;
 	private FrameMain frameMain;
 	
-	public Login() {
+	public LogicLogin() {
 		socket = null;
 		errorMsg = null;
 		authorityCode = null;

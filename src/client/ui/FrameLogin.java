@@ -12,9 +12,10 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-
-import client.log.Login;
+import client.uiLogic.log.LogicLogin;
 import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 /**
  * 用于处理登录事务的UI类
@@ -32,11 +33,11 @@ public class FrameLogin extends JFrame {
 	private JLabel portLabel;
 	private JTextField portField;
 	private JLabel userImgLabel;
-	private Login loginController;
+	private LogicLogin logicController;
 	private JLabel msgLabel;
 
 	/**
-	 * 创建窗口
+	 * 创建登录窗口
 	 */
 	public FrameLogin() {
 		
@@ -51,7 +52,7 @@ public class FrameLogin extends JFrame {
 		setExitButton();
 		setUserImgLabel();
 		setErrorMsgLabel();
-		loginController = new Login();
+		logicController = new LogicLogin();
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
@@ -74,13 +75,13 @@ public class FrameLogin extends JFrame {
 				String password = String.valueOf(passwordField.getPassword());
 				msgLabel.setForeground(Color.BLUE);
 				msgLabel.setText("正在连接服务器，请稍候");
-				int cond = loginController.login(port, account, password);
+				int cond = logicController.login(port, account, password);
 				if(cond==0) {
 					setVisible(false);
-					loginController.getFrameMain().setVisible(true);
+					logicController.getFrameMain().setVisible(true);
 				}else if(cond==1) {
 					msgLabel.setForeground(Color.RED);
-					msgLabel.setText(loginController.getErrorMsg());
+					msgLabel.setText(logicController.getErrorMsg());
 				}
 			}
 		});
@@ -145,6 +146,14 @@ public class FrameLogin extends JFrame {
 	
 	private void setPasswordField() {
 		passwordField = new JPasswordField();
+		passwordField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyChar()==KeyEvent.VK_ENTER) {
+					loginButton.doClick();
+				}
+			}
+		});
 		passwordField.setBounds(170, 235, 180, 30);
 		contentPane.add(passwordField);
 	}

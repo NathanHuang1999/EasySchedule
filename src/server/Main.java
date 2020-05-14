@@ -53,7 +53,7 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}     
-	    LoginFeedback loginFeedback = new LoginFeedback();
+	    LoginFeedback loginFeedback = new LoginFeedback(null);
         os.writeObject(loginFeedback);
         os.flush();
         

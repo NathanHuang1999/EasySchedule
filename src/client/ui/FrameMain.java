@@ -18,9 +18,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JMenu;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JTabbedPane;
 
 /**
- * 程序主要界面UI
+ * 程序主界面UI
  * @author huang
  * @date 2020-05-10
  *
@@ -40,7 +41,8 @@ public class FrameMain extends JFrame {
 		
 		setTitle("易排课客户端");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 800, 600);
+		setLocationRelativeTo(null); 
 		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -88,6 +90,9 @@ public class FrameMain extends JFrame {
 		
 		JMenuItem menuItemAbout = new JMenuItem("关于");
 		menuHelp.add(menuItemAbout);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		getContentPane().add(tabbedPane, BorderLayout.CENTER);
 	}
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
