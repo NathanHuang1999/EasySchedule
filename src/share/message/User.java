@@ -1,4 +1,4 @@
-package share;
+package share.message;
 
 import java.io.Serializable;
 
