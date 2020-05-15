@@ -1,4 +1,4 @@
-package client.socket;
+package share;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,34 +8,31 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 /**
- * 客户端的socket类，用于处理和服务器的通信
+ * socket基类
  * @author huang
- * @date 2020-05-08
+ * @date 2020-05-15
  *
  */
 public class SocketBase {
-	private Socket socket;
-	private OutputStream out;
-	private InputStream in;
-    private ObjectOutputStream os;
-    private ObjectInputStream is;
-	private byte[] inBuffer;
+	
+	protected Socket socket;
+	protected OutputStream out;
+	protected InputStream in;
+	protected ObjectOutputStream os;
+	protected ObjectInputStream is;
+	protected byte[] inBuffer;
 	
 	/**
 	 * 建立一个socket
 	 * @param portNumber 服务器的端口号
 	 */
-	public SocketBase(int portNumber){
-		try {
-			socket = new Socket("localhost", portNumber);
-			out=socket.getOutputStream();
-			in=socket.getInputStream();
-			inBuffer = null;
-			os=new ObjectOutputStream(socket.getOutputStream());
-			is=new ObjectInputStream(socket.getInputStream());
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
+	public SocketBase(){
+		socket = null;
+		out = null;
+		in = null;
+		os = null;
+		is = null;
+		inBuffer = null;
 	}
 
 	/**

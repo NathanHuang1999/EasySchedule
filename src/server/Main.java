@@ -1,27 +1,88 @@
 package server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.*;
 
-import share.LoginFeedback;
-import share.User;
+import share.message.LoginFeedback;
+import share.message.User;
 
 /**
  * 服务器的程序入口类
  * @author huang
- * @date 2020-05-10
+ * @date 2020-05-15
  * 
  */
 public class Main {
+	
+	private String sqlAccount;
+	private String DBName;
+	private Connection conn;
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args){
 		
-		//TODO 这块代码目前只是用来调试客户端的桩代码，未来在开发服务器时需要更换
+		Main main = new Main();
+		main.login();
+		SocketServer server = new SocketServer(1200);
+		
+		/*
+		 * try { testStubForClient(); } catch (IOException e) { // TODO Auto-generated
+		 * catch block e.printStackTrace(); }
+		 */
+
+	}
+	
+	public Main() {
+		System.out.println("欢迎来到 易排课 EasySchdule 服务器");
+		sqlAccount = null;
+		DBName = null;
+		conn = null;
+	}
+	
+	/**
+	 * 服务器尝试建立与mysql服务器的连接
+	 */
+	private void login() {
+		Boolean accessSuccess = false; 
+		String sqlPassword;
+		while(!accessSuccess) {
+			try {
+				System.out.println("请输入mysql客户端的用户名：");
+				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+				sqlAccount = br.readLine();
+				System.out.println("请输入mysql客户端的密码：");
+				sqlPassword = br.readLine();
+				System.out.println("请输入数据库的名称：");
+				DBName = br.readLine();
+				Class.forName("com.mysql.cj.jdbc.Driver");
+				/**
+				 * 目前与mysql服务器的连接是不使用SSL的，未来考虑修改这个设定
+				 */
+				String URL = "jdbc:mysql://localhost/" + DBName + "?useSSL=false";
+				conn = DriverManager.getConnection(URL, sqlAccount, sqlPassword);
+				System.out.println("登录成功！");
+				accessSuccess = true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SQLException e) {
+				System.out.println("数据库连接失败，请检查用户名、密码、数据库名是否正确！");
+				System.out.println("请重新登录！");
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void testStubForClient() throws IOException {
 		
 	    ServerSocket serverSocket=null;
 	    Socket socket=null;
@@ -47,10 +108,8 @@ public class Main {
 	      //在服务器端输出name成员和password成员信息
 	        System.out.println("user: "+user.getAccount()+"/"+user.getPassword());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}     
 	    LoginFeedback loginFeedback = new LoginFeedback(null);
@@ -59,7 +118,6 @@ public class Main {
         
 	    serverSocket.close();
 	    socket.close();
-
 	}
 
 }

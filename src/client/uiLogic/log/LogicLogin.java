@@ -1,9 +1,9 @@
 package client.uiLogic.log;
 
-import client.socket.SocketBase;
+import client.SocketClient;
 import client.ui.FrameMain;
-import share.LoginFeedback;
-import share.User;
+import share.message.LoginFeedback;
+import share.message.User;
 
 /**
  * 用于处理登录事务的逻辑类
@@ -13,7 +13,7 @@ import share.User;
  */
 public class LogicLogin {
 	
-	private SocketBase socket;
+	private SocketClient socket;
 	private String errorMsg;
 	private String authorityCode;
 	private FrameMain frameMain;
@@ -31,7 +31,7 @@ public class LogicLogin {
 		 * 试图与服务器建立连接，并发送登录请求
 		 */
 		User user = new User(account, password);
-		socket = new SocketBase(port);
+		socket = new SocketClient(port);
 		socket.sendData(user);
 		/**
 		 * 获取服务器的反馈信息并处理
@@ -46,7 +46,7 @@ public class LogicLogin {
 		return cond;
 	}
 	
-	public SocketBase getSocket() {
+	public SocketClient getSocket() {
 		return socket;
 	}
 	
