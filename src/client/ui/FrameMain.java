@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import client.socket.SocketBase;
+import share.SocketBase;
 
 import javax.swing.JPopupMenu;
 import java.awt.Component;
