@@ -11,7 +11,7 @@ import share.SocketBase;
 /**
  * 服务器的socket类
  * @author huang
- * @date 2020-05-15
+ * @date 2020-05-23
  *
  */
 public class SocketServer extends SocketBase {
@@ -41,5 +41,12 @@ public class SocketServer extends SocketBase {
 		super.is=new ObjectInputStream(super.in);
 	}
 	
-	
+	public void closeClient() {
+		try {
+			socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
