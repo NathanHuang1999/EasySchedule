@@ -1,6 +1,7 @@
-package client.uiLogic.log;
+package client.uiLogic;
 
 import client.SocketClient;
+import client.ui.FrameLogin;
 import client.ui.FrameMain;
 import share.message.LoginFeedback;
 import share.message.User;
@@ -8,21 +9,21 @@ import share.message.User;
 /**
  * 用于处理登录事务的逻辑类
  * @author huang
- * @date 2020-05-10
+ * @date 2020-05-25
  *
  */
 public class LogicLogin {
 	
+	private FrameLogin uiController;
+	
 	private SocketClient socket;
 	private String errorMsg;
 	private String authorityCode;
-	private FrameMain frameMain;
 	
 	public LogicLogin() {
 		socket = null;
 		errorMsg = null;
 		authorityCode = null;
-		frameMain = null;
 	}
 	
 	public int login(int port, String account, String password) {
@@ -38,7 +39,11 @@ public class LogicLogin {
 		 */
 		LoginFeedback loginFeedback = (LoginFeedback) socket.recvDataObj();				
 		if(loginFeedback.getPermission()) {
-			frameMain = new FrameMain(socket ,loginFeedback.getAuthorityCode());
+			FrameMain frameMain = new FrameMain();
+			LogicMain logicMain = new LogicMain(socket ,loginFeedback.getAuthorityCode());
+			frameMain.setLogicController(logicMain);
+			logicMain.setUIController(frameMain);
+			frameMain.setVisible(true);
 		}else {
 			errorMsg = loginFeedback.getErrorMsg();
 			cond = 1;
@@ -46,12 +51,12 @@ public class LogicLogin {
 		return cond;
 	}
 	
-	public SocketClient getSocket() {
-		return socket;
+	public void setUIController(FrameLogin uiController) {
+		this.uiController = uiController;
 	}
 	
-	public FrameMain getFrameMain() {
-		return frameMain;
+	public SocketClient getSocket() {
+		return socket;
 	}
 	
 	public String getErrorMsg() {

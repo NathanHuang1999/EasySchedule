@@ -2,8 +2,8 @@ package client;
 
 import java.awt.EventQueue;
 
-import client.uiLogic.log.LogicLogin;
 import client.ui.FrameLogin;
+import client.uiLogic.LogicLogin;
 
 /**
  * 客户端的程序入口类
@@ -21,8 +21,11 @@ public class Main {
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
 					try {
-						FrameLogin login = new FrameLogin();
-						login.setVisible(true);
+						FrameLogin frameLogin = new FrameLogin();
+						LogicLogin logicLogin = new LogicLogin();
+						frameLogin.setLogicController(logicLogin);
+						logicLogin.setUIController(frameLogin);
+						frameLogin.setVisible(true);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

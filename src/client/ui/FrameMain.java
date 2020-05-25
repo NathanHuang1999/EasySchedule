@@ -3,10 +3,13 @@ package client.ui;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
+import javax.swing.Icon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import client.SocketClient;
+import client.uiLogic.LogicMain;
 import share.SocketBase;
 
 import javax.swing.JPopupMenu;
@@ -23,25 +26,22 @@ import javax.swing.JTabbedPane;
 /**
  * 程序主界面UI
  * @author huang
- * @date 2020-05-10
+ * @date 2020-05-24
  *
  */
 public class FrameMain extends JFrame {
 
-	private SocketBase socket = null;
-	private String authorityCode = null;
+	private LogicMain logicController = null;
+	private JTabbedPane PanelTabbedBackground = null;
 	
 	/**
 	 * Create the frame.
 	 */
-	public FrameMain(SocketBase socket, String authorityCode) {
-		
-		this.socket = socket;
-		this.authorityCode = authorityCode;
+	public FrameMain() {
 		
 		setTitle("易排课客户端");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 600);
+		setBounds(100, 100, 1000, 618);
 		setLocationRelativeTo(null); 
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -65,6 +65,11 @@ public class FrameMain extends JFrame {
 		menuBar.add(menuRecord);
 		
 		JMenuItem menuItemInquireRecord = new JMenuItem("查询/修改记录");
+		menuItemInquireRecord.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				logicController.inquireOrUpdateRecord();
+			}
+		});
 		menuRecord.add(menuItemInquireRecord);
 		
 		JMenuItem menuItemAddNewRecord = new JMenuItem("增加新记录");
@@ -91,10 +96,26 @@ public class FrameMain extends JFrame {
 		JMenuItem menuItemAbout = new JMenuItem("关于");
 		menuHelp.add(menuItemAbout);
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		getContentPane().add(tabbedPane, BorderLayout.CENTER);
+		PanelTabbedBackground = new JTabbedPane(JTabbedPane.LEFT);
+		getContentPane().add(PanelTabbedBackground, BorderLayout.CENTER);
+		
 	}
 
+	/**
+	 * 在主界面上加入标签页面
+	 * @param tabName 标签名称
+	 * @param icon 标签图标
+	 * @param newTabbedPanel 标签页面对象
+	 * @param tip 页面注释
+	 */
+	public void addTabbedPanel(String tabName, Icon icon, JPanel newTabbedPanel, String tip) {
+		PanelTabbedBackground.addTab(tabName, icon, newTabbedPanel, tip);
+	}
+	
+	public void setLogicController(LogicMain logicController) {
+		this.logicController = logicController;
+	}
+	
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {

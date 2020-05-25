@@ -10,9 +10,11 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+
+import client.uiLogic.LogicLogin;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import client.uiLogic.log.LogicLogin;
 import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -20,11 +22,13 @@ import java.awt.event.KeyEvent;
 /**
  * 用于处理登录事务的UI类
  * @author huang
- * @date 2020-05-10
+ * @date 2020-05-25
  *
  */
 public class FrameLogin extends JFrame {
 
+	private LogicLogin logicController;
+	
 	private JPanel contentPane;
 	private JTextField accountField;
 	private JPasswordField passwordField;
@@ -33,7 +37,6 @@ public class FrameLogin extends JFrame {
 	private JLabel portLabel;
 	private JTextField portField;
 	private JLabel userImgLabel;
-	private LogicLogin logicController;
 	private JLabel msgLabel;
 
 	/**
@@ -52,12 +55,13 @@ public class FrameLogin extends JFrame {
 		setExitButton();
 		setUserImgLabel();
 		setErrorMsgLabel();
-		logicController = new LogicLogin();
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-	
+	public void setLogicController(LogicLogin logicController) {
+		this.logicController = logicController;
+	}
 	
 	private void setLoginButton() {
 		loginButton = new JButton("登录");
@@ -78,7 +82,7 @@ public class FrameLogin extends JFrame {
 				int cond = logicController.login(port, account, password);
 				if(cond==0) {
 					setVisible(false);
-					logicController.getFrameMain().setVisible(true);
+					//logicController.getFrameMain().setVisible(true);
 				}else if(cond==1) {
 					msgLabel.setForeground(Color.RED);
 					msgLabel.setText(logicController.getErrorMsg());
