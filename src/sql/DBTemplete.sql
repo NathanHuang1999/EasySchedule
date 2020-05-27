@@ -1,18 +1,10 @@
 /*
 用于创建数据库模式的sql脚本，不包含课表
 @author huang
-@date 2020-05-16
+@date 2020-05-27
 */
 #改变数据库的编码方式以兼容中文输入
 #alter database enterprises character set utf8mb4
-
-#创建“课程”表
-create table course(
-	name		varchar(20),
-	category	char(2) not null,
-	constraint chk_category check (category in ('主课', '副课')),
-	primary key (name)
-);
 
 #创建“班级”表
 create table class(
@@ -23,7 +15,7 @@ create table class(
 	primary key (grade, class_no)
 );
 
-#创建“老师”表
+#创建“教师”表
 create table teacher(
 	id		varchar(20),
 	name		varchar(20) not null,
@@ -46,10 +38,31 @@ create table time_slot(
 create table special_classroom(
 	category	varchar(20),
 	room_no		smallint,
+	primary key (category, room_no)
+);
+
+#创建“课程”表
+create table course(
+	name		varchar(20),
+	category	char(2) not null,
+	special_classroom_category	varchar(20),
+	special_classroom_no	smallint,
+	constraint chk_category check (category in ('主课', '副课')),
+	primary key (name),
+	foreign key (special_classroom_category, special_classroom_no) references special_classroom(category, room_no)
+		on delete set null on update cascade
+);
+
+#创建“能够教学”表
+create table able_to_teach(
+	teacher_id	varchar(20),
 	course_name	varchar(20),
-	primary key (category, room_no),
+	ability		varchar(20),
+	primary key (teacher_id, course_name),
+	foreign key (teacher_id) references teacher(id)
+		on delete cascade on update cascade,
 	foreign key (course_name) references course(name)
-		on delete set null
+		on delete cascade on update cascade
 );
 
 #创建“教学”表
@@ -62,11 +75,11 @@ create table teaches(
 	constraint chk_amount_per_week check (amount_per_week > 0),
 	primary key (grade, class_no, course_name, teacher_id),
 	foreign key (grade, class_no) references class(grade, class_no)
-		on delete cascade,
+		on delete cascade on update cascade,
 	foreign key (course_name) references course(name)
-		on delete cascade,
+		on delete cascade on update cascade,
 	foreign key (teacher_id) references teacher(id)
-		on delete cascade
+		on delete cascade on update cascade
 );
 
 #创建“电话号码”表
@@ -75,17 +88,5 @@ create table phone_no(
 	teacher_id	varchar(20),
 	primary key (phone_no, teacher_id),
 	foreign key (teacher_id) references teacher(id)
-		on delete cascade
-);
-
-#创建“能够教学”表
-create table able_to_teach(
-	teacher_id	varchar(20),
-	course_name	varchar(20),
-	ability		varchar(20),
-	primary key (teacher_id, course_name),
-	foreign key (teacher_id) references teacher(id)
-		on delete cascade,
-	foreign key (course_name) references course(name)
-		on delete cascade
+		on delete cascade on update cascade
 );
