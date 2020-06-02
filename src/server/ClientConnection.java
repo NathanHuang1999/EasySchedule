@@ -2,25 +2,30 @@ package server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.Connection;
 
+import server.business.QuireRecord;
+import share.instruction.InstQuireRecord;
+import share.message.InstructionMsg;
 import share.message.LoginFeedback;
 import share.message.User;
 
 /**
  * 一个用于管理一个客户端-服务器连接的类
  * @author huang
- * @date 2020-05-23
+ * @date 2020-06-02
  *
  */
 public class ClientConnection {
 	
 	private SocketServer socketServer;
 	private Boolean closeConnection;
-	private Socket socket=null;
+	private Connection conn;
 	
-	public ClientConnection(SocketServer socketServer) {
+	public ClientConnection(SocketServer socketServer, Connection conn) {
 		
 		this.socketServer = socketServer;
+		this.conn = conn;
 		closeConnection = false;
 		try {
 			socketServer.connectClient();
@@ -33,6 +38,11 @@ public class ClientConnection {
 			loginSuccessReturnMsg();
 			while(!closeConnection) {
 				// TODO 此处应有从服务器端接收并解析命令的模块
+				InstructionMsg msg = (InstructionMsg)socketServer.recvDataObj();
+				switch(msg.getType()) {
+				case InstructionMsg.QUIRE_RECORD:
+					QuireRecord busiQuireRecord = new QuireRecord((InstQuireRecord)msg.getInstruction(), socketServer, conn);
+				}
 			}
 		}else {
 			loginFailCloseConnection();
@@ -53,7 +63,7 @@ public class ClientConnection {
 		String userAccount = user.getAccount();
 		String userPassword = user.getPassword();
 		// TODO 用户信息验证，目前这小段代码仅用来调试
-		if(userAccount.equals("hsy") && userPassword.equals("1999221")) {
+		if(userAccount.equals("abc") && userPassword.equals("123")) {
 			loginSuccess = true;
 		}else {
 			loginSuccess = false;
@@ -65,7 +75,7 @@ public class ClientConnection {
 	 * 用于在客户端登录成功时返回成功信息的函数
 	 */
 	public void loginSuccessReturnMsg() {
-		LoginFeedback loginFeedback = new LoginFeedback("abcd");
+		LoginFeedback loginFeedback = new LoginFeedback(true, null);
 		socketServer.sendData(loginFeedback);
 	}
 	
@@ -73,7 +83,7 @@ public class ClientConnection {
 	 * 用于在客户端登录失败时返回失败信息并关闭socket的函数
 	 */
 	private void loginFailCloseConnection() {
-		LoginFeedback loginFeedback = new LoginFeedback();
+		LoginFeedback loginFeedback = new LoginFeedback(false, "用户名或密码错误");
         socketServer.sendData(loginFeedback);
         socketServer.closeClient();
 	}
