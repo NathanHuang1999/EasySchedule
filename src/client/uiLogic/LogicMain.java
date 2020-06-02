@@ -7,18 +7,16 @@ import client.ui.PanelInquireRecord;
 /**
  * 程序主界面逻辑
  * @author huang
- * @date 2020-05-24
+ * @date 2020-05-28
  *
  */
 public class LogicMain {
 	
 	private FrameMain uiController = null;
 	private SocketClient socket = null;
-	private String authorityCode = null;
 	
-	public LogicMain(SocketClient socket, String authorityCode) {
+	public LogicMain(SocketClient socket) {
 		this.socket = socket;
-		this.authorityCode = authorityCode;
 	}
 	
 	public void setUIController(FrameMain uiController) {
@@ -26,10 +24,10 @@ public class LogicMain {
 	}
 	
 	public void inquireOrUpdateRecord() {
-		PanelInquireRecord panelInquireRecord = new PanelInquireRecord();
 		LogicInquireRecord logicInquireRecord = new LogicInquireRecord();
-		panelInquireRecord.setLogicController(logicInquireRecord);
+		PanelInquireRecord panelInquireRecord = new PanelInquireRecord(logicInquireRecord);
 		logicInquireRecord.setUIController(panelInquireRecord);
+		logicInquireRecord.setSocket(socket);
 		uiController.addTabbedPanel("查/改记录", null, panelInquireRecord, null);
 	}
 	

@@ -20,7 +20,7 @@ create table teacher(
 	id		varchar(20),
 	name		varchar(20) not null,
 	sex		char(1), 
-	introduction text,
+	introduction varchar(500),
 	constraint chk_sex check (sex in ('F', 'M')),
 	primary key (id)
 );
