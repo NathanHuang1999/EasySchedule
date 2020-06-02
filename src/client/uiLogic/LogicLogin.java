@@ -9,7 +9,7 @@ import share.message.User;
 /**
  * 用于处理登录事务的逻辑类
  * @author huang
- * @date 2020-05-25
+ * @date 2020-05-27
  *
  */
 public class LogicLogin {
@@ -18,12 +18,10 @@ public class LogicLogin {
 	
 	private SocketClient socket;
 	private String errorMsg;
-	private String authorityCode;
 	
 	public LogicLogin() {
 		socket = null;
 		errorMsg = null;
-		authorityCode = null;
 	}
 	
 	public int login(int port, String account, String password) {
@@ -40,7 +38,7 @@ public class LogicLogin {
 		LoginFeedback loginFeedback = (LoginFeedback) socket.recvDataObj();				
 		if(loginFeedback.getPermission()) {
 			FrameMain frameMain = new FrameMain();
-			LogicMain logicMain = new LogicMain(socket ,loginFeedback.getAuthorityCode());
+			LogicMain logicMain = new LogicMain(socket);
 			frameMain.setLogicController(logicMain);
 			logicMain.setUIController(frameMain);
 			frameMain.setVisible(true);
@@ -63,7 +61,4 @@ public class LogicLogin {
 		return errorMsg;
 	}
 	
-	public String getAuthorityCode() {
-		return authorityCode;
-	}
 }

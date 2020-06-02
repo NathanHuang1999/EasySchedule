@@ -8,7 +8,7 @@ import java.sql.*;
 /**
  * 服务器的程序入口类
  * @author huang
- * @date 2020-05-23
+ * @date 2020-06-02
  * 
  */
 public class Main {
@@ -27,7 +27,7 @@ public class Main {
 		SocketServer server = new SocketServer(12000); 
 		System.out.println("正在等待客户端连接");
 		while(true) {
-			ClientConnection clientConnection = new ClientConnection(server);
+			ClientConnection clientConnection = new ClientConnection(server, main.getConnection());
 		}
 		 
 
@@ -59,7 +59,7 @@ public class Main {
 				/**
 				 * 目前与mysql服务器的连接是不使用SSL的，未来考虑修改这个设定
 				 */
-				String URL = "jdbc:mysql://localhost/" + DBName + "?useSSL=false";
+				String URL = "jdbc:mysql://localhost/" + DBName + "?useSSL=false&useUnicode=true&characterEncoding=utf8";
 				conn = DriverManager.getConnection(URL, sqlAccount, sqlPassword);
 				System.out.println("登录成功！");
 				accessSuccess = true;
@@ -74,6 +74,10 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public Connection getConnection() {
+		return conn;
 	}
 
 }
