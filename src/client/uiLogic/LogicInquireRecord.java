@@ -1,8 +1,12 @@
 package client.uiLogic;
 
+import java.awt.CardLayout;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+
+import javax.swing.JPanel;
+import javax.swing.table.AbstractTableModel;
 
 import client.SocketClient;
 import client.ui.PanelInquireRecord;
@@ -18,7 +22,12 @@ import share.message.QuiryResultMsg;
  */
 public class LogicInquireRecord {
 	
+	private JPanel backgroundPanel = null;
+	private CardLayout card = null;
+	
+	private LogicMain logicFather = null;
 	private PanelInquireRecord uiController = null;
+	
 	private SocketClient socket = null;
 	
 	//TODO 完善高级搜索类型
@@ -27,8 +36,8 @@ public class LogicInquireRecord {
 	private String categorySelect = null; 
 	private String quiryContent = null;
 
-	public LogicInquireRecord() {
-		
+	public LogicInquireRecord(LogicMain logicFather) {
+		this.logicFather = logicFather;
 	}
 	
 	public void setCategorySelect(String categorySelect) {
@@ -45,6 +54,7 @@ public class LogicInquireRecord {
 	//TODO 目前没有增加高级搜索功能
 	public void quire(String quiryContent) {
 		this.quiryContent = quiryContent;
+		if(categorySelect.equals("-请选择-")) return;
 		InstQuireRecord quiry = new InstQuireRecord(categorySelect, quiryContent);
 		socket.sendData(new InstructionMsg(InstructionMsg.QUIRE_RECORD, quiry));
 		/**
@@ -54,30 +64,15 @@ public class LogicInquireRecord {
 		
 		//TODO 待修改
 		if(quiryResultMsg.getQuirySuccess()) {
-			try {
-				quiryResultMsg.beforeFirst();
-				System.out.print(">\n");
-				while(quiryResultMsg.next()) {
-					System.out.print(quiryResultMsg.getString(0) + "\t");
-					System.out.print(quiryResultMsg.getString(1) + "\t");
-					System.out.print(quiryResultMsg.getString(2) + "\t");
-					System.out.print(quiryResultMsg.getString(3) + "\t");
-					System.out.print(quiryResultMsg.getString(4) + "\t");
-					System.out.print(quiryResultMsg.getString(5) + "\t");
-					System.out.print(quiryResultMsg.getString(6) + "\t");
-					System.out.print(quiryResultMsg.getShort(7) + "\t");
-					System.out.print(quiryResultMsg.getShort(8) + "\t");
-					System.out.print(quiryResultMsg.getString(9) + "\t");
-					System.out.print(quiryResultMsg.getShort(10) + "\t");
-					System.out.print("\n");
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			uiController.fillTable(quiryResultMsg);
 			
 		}
 		
+	}
+	
+	public void setBackgroundPanel(JPanel backgroundPanel) {
+		this.backgroundPanel = backgroundPanel;
+		this.card = (CardLayout) backgroundPanel.getLayout();
 	}
 	
 	public void setUIController(PanelInquireRecord uiController) {
@@ -87,4 +82,13 @@ public class LogicInquireRecord {
 	public void setSocket(SocketClient socket) {
 		this.socket = socket;
 	}
+	
+	public void removeThisTab() {
+		logicFather.removeTabbedPanel(backgroundPanel);
+	}
+	
+	public void switchPanel(String name) {
+		card.show(backgroundPanel, name);
+	}
+	
 }

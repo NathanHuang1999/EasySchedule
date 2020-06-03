@@ -6,16 +6,19 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import javax.swing.table.AbstractTableModel;
+
 /**
  * 用于返回查询请求的结果的类
  * @author huang
- * @date 2020-06-01
+ * @date 2020-06-03
  *
  */
-public class QuiryResultMsg implements Serializable{
+public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 
 	private Boolean quirySuccess = null;
 	private String errorMsg = null;
+	private String category = null;
 	
 	private int pointer = -1;
 	private int attributeNumber = 0;
@@ -28,15 +31,19 @@ public class QuiryResultMsg implements Serializable{
 	private ArrayList<String> columnName = new ArrayList<String>();
 	private ArrayList<Integer> columnType = new ArrayList<Integer>();
 	
+	private int[] grouping = null;
+	private ArrayList<ArrayList<ArrayList<Integer>>> resolveCube = new ArrayList<ArrayList<ArrayList<Integer>>>();
+	
 	
 	public QuiryResultMsg(String errorMsg) {
 		quirySuccess = false;
 		this.errorMsg = errorMsg;
 	}
 
-	public QuiryResultMsg(ResultSet resultSet) throws SQLException {
+	public QuiryResultMsg(ResultSet resultSet, int[] grouping) throws Exception {
 		
 		quirySuccess = true;
+		this.grouping = grouping;
 		ResultSetMetaData metaData = resultSet.getMetaData();
 		//获取列数
 		attributeNumber = metaData.getColumnCount();
@@ -82,7 +89,111 @@ public class QuiryResultMsg implements Serializable{
 				}
 			}
 		}
+		//当结果集非空时，处理多值问题
+		multiValueHandle();
 		
+	}
+	
+	private void multiValueHandle() throws Exception {
+		if(recordNumber != 0) {
+			
+			//判断grouping参数的长度和属性数是否一致
+			if(grouping.length!=attributeNumber) throw new Exception("grouping length does not equal to attribute number");
+			
+			//判断属性中是否有多值属性
+			Boolean oneInGrouping = false;
+			for(int i=0; i<grouping.length; i++) {
+				if(grouping[i] == 1) oneInGrouping = true;
+			}
+			
+			if(!oneInGrouping) {
+				//若属性中没有多值属性，则运行这个分支
+				for(int i=0; i<recordNumber; i++) {
+					resolveCube.add(new ArrayList<ArrayList<Integer>>());
+					resolveCube.get(i).add(new ArrayList<Integer>());
+					resolveCube.get(i).get(0).add(i);
+				}
+			}else {
+				//若属性中存在多值属性，则运行这个分支
+				int maxGroup = grouping[grouping.length-1];
+				ArrayList<Integer> groupingCount = new ArrayList<Integer>(maxGroup+1);
+				ArrayList<Integer> groupingStart = new ArrayList<Integer>(maxGroup+1);
+				for(int i=0; i<maxGroup+1; i++) {
+					groupingCount.add(0);
+					groupingStart.add(-1);
+				}
+				for(int i=0; i<grouping.length; i++) {
+					if(groupingStart.get(grouping[i])==-1) {
+						groupingStart.set(grouping[i], i);
+					}
+					groupingCount.set(grouping[i], groupingCount.get(grouping[i]) + 1);
+				}
+				
+				//设定第1个G0对象数组
+				ArrayList<Object> g0 = new ArrayList<Object>(groupingCount.get(0));
+				for(int i=0; i<groupingCount.get(0); i++) {
+					g0.add(getOriginalValueAt(0, i));
+				}
+				//设定第1个G1-n对象数组
+				ArrayList<ArrayList<ArrayList<Object>>> gx = new ArrayList<ArrayList<ArrayList<Object>>>(maxGroup);
+				for(int i=0; i<maxGroup; i++) {
+					gx.add(new ArrayList<ArrayList<Object>>());
+					gx.get(i).add(new ArrayList<Object>());
+					for(int j=0; j<groupingCount.get(i+1); j++) {
+						gx.get(i).get(0).add(getOriginalValueAt(0, groupingStart.get(i+1)+j));
+					}
+				}
+				//初始化resolveCube
+				resolveCube.add(new ArrayList<ArrayList<Integer>>());
+				for(int i=0; i<maxGroup+1; i++) {
+					resolveCube.get(0).add(new ArrayList<Integer>());
+					resolveCube.get(0).get(i).add(0);
+				}
+				//循环处理从第2个记录开始的所有记录
+				for(int i=1; i<recordNumber; i++) {
+					//获取newg0
+					ArrayList<Object> newg0 = new ArrayList<Object>(groupingCount.get(0));
+					for(int j=0; j<groupingCount.get(0); j++) {
+						newg0.add(getOriginalValueAt(i, j));
+					}
+					//获取newgx
+					ArrayList<ArrayList<Object>> newgx = new ArrayList<ArrayList<Object>>(maxGroup);
+					for(int j=0; j<maxGroup; j++) {
+						newgx.add(new ArrayList<Object>());
+						for(int k=0; k<groupingCount.get(j+1); k++) {
+							newgx.get(j).add(getOriginalValueAt(i, groupingStart.get(j+1)+k));
+						}
+					}
+					//判断newg0和g0是否相等
+					if(g0.equals(newg0)) {
+						//TODO 当newg0和g0相等时，即单值/主要属性相同时，进入此分支以进行多值属性整合
+						for(int j=0; j<maxGroup; j++) {
+							if(!gx.get(j).contains(newgx.get(j))){
+								gx.get(j).add(newgx.get(j));
+								//第一次更新resolveCube
+								resolveCube.get(resolveCube.size()-1).get(j+1).add(i);
+							}
+						}
+					}else {
+						///当newg0和g0不等时，即更换了单值/主要属性时，进入此分支以更新g0和gx
+						g0 = newg0;
+						//第二次更新resolveCube的0位置
+						resolveCube.add(new ArrayList<ArrayList<Integer>>());
+						int pos = resolveCube.size()-1;
+						resolveCube.get(pos).add(new ArrayList<Integer>());
+						resolveCube.get(pos).get(0).add(i);
+						gx = new ArrayList<ArrayList<ArrayList<Object>>>(maxGroup);
+						for(int j=0; j<maxGroup; j++) {
+							gx.add(new ArrayList<ArrayList<Object>>());
+							gx.get(j).add(newgx.get(j));
+							//第二次更新resolveCube的非0位置
+							resolveCube.get(pos).add(new ArrayList<Integer>());
+							resolveCube.get(pos).get(j+1).add(i);
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	public Boolean getQuirySuccess() {
@@ -112,6 +223,55 @@ public class QuiryResultMsg implements Serializable{
 		int type = relocalizeTable.get(index)[0];
 		if(type == 0) throw new SQLException("Type of the column is not String");
 		return columnString.get(relocalizeTable.get(index)[1]).get(pointer);
+	}
+
+	@Override
+	public String getColumnName(int columnIndex) {
+		return columnName.get(columnIndex);
+	}
+	
+	@Override
+	public int getColumnCount() {
+		return attributeNumber;
+	}
+
+	@Override
+	public int getRowCount() {
+		return resolveCube.size();
+	}
+
+	@Override
+	public Object getValueAt(int rindex, int cindex) {
+		
+		int realRIndex = resolveCube.get(rindex).get(0).get(0);
+		int type = relocalizeTable.get(cindex)[0];
+		Object value = null;
+		switch(type) {
+		case 0:
+			value = columnSmallInt.get(relocalizeTable.get(cindex)[1]).get(realRIndex);
+			break;
+		case 1:
+			value = columnString.get(relocalizeTable.get(cindex)[1]).get(realRIndex);
+			break;
+		}
+		return value;
+		
+	}
+	
+	public Object getOriginalValueAt(int rindex, int cindex) {
+		
+		int type = relocalizeTable.get(cindex)[0];
+		Object value = null;
+		switch(type) {
+		case 0:
+			value = columnSmallInt.get(relocalizeTable.get(cindex)[1]).get(rindex);
+			break;
+		case 1:
+			value = columnString.get(relocalizeTable.get(cindex)[1]).get(rindex);
+			break;
+		}
+		return value;
+		
 	}
 	
 }

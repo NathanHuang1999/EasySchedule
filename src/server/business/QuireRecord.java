@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import server.SocketServer;
 import share.instruction.InstQuireRecord;
@@ -22,15 +23,30 @@ public class QuireRecord {
 	
 	private String category;
 	private String quiryContent;
+	public static int[][] groupingResolve = {{0,0,0,0,1,2,2,3,3,3,3}, {0,0,0,0,0,0}, {0,0,0,0}, {0,0,1,1,1,1}, {0,0}};
+	private int[] grouping = null;
 	
 	public QuireRecord(InstQuireRecord instruction, SocketServer socketServer, Connection conn) {
 		
 		this.socketServer = socketServer;
 		this.conn = conn;
 		this.category = instruction.getCategorySelect();
-				
+		
+		switch(category) {
+		case "教师":
+			grouping = groupingResolve[0];break;
+		case "教学安排":
+			grouping = groupingResolve[1];break;
+		case "课程":
+			grouping = groupingResolve[2];break;
+		case "班级":
+			grouping = groupingResolve[3];break;
+		case "特殊教室":
+			grouping = groupingResolve[4];break;
+		}
+		
 		if(instruction.getUseAdvancedQuiry()) {
-			//TODO 使用高级搜索
+			//TODO 使用高级搜索。如果时间充裕会添加此部分
 			
 		}else {
 			this.quiryContent = instruction.getQuiryContent();
@@ -48,23 +64,32 @@ public class QuireRecord {
 		QuiryResultMsg quiryResultMsg = null;
 		try {
 			resultSet = stmtQuiryNumResolve();
-			quiryResultMsg = new QuiryResultMsg(resultSet);
+			quiryResultMsg = new QuiryResultMsg(resultSet, grouping);
 		}catch(NumberFormatException e) {
 			try {
 				resultSet = stmtQuiryNonNumResolve();
-				quiryResultMsg = new QuiryResultMsg(resultSet);
+				quiryResultMsg = new QuiryResultMsg(resultSet, grouping);
 			} catch (SQLException e1) {
 				quiryResultMsg = new QuiryResultMsg("数据库异常，请稍后再试");
+				e1.printStackTrace();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		} catch (SQLException e) {
 			quiryResultMsg = new QuiryResultMsg("数据库异常，请稍后再试");
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		socketServer.sendData(quiryResultMsg);
 		
 	}
 
+	/*
+	 * 将查询内容解析成数字进行查询的函数
+	 */
 	private ResultSet stmtQuiryNumResolve() throws SQLException {
 		short numEqual = (short)Integer.parseInt(quiryContent);
 		String pattern = "%" + quiryContent + "%";
@@ -78,7 +103,8 @@ public class QuireRecord {
 					+ "left outer join able_to_teach on (teacher.id = able_to_teach.teacher_id)) "
 					+ "left outer join teaches on (teacher.id = teaches.teacher_id) "
 					+ "where ((teacher.id like ?) or (teacher.name like ?) or (teacher.sex like ?) or (phone_no.phone_no like ?) "
-					+ "or (able_to_teach.course_name like ?) or (teaches.grade = ?) or (teaches.class_no = ?) or (teaches.course_name like ?))");
+					+ "or (able_to_teach.course_name like ?) or (teaches.grade = ?) or (teaches.class_no = ?) or (teaches.course_name like ?)) "
+					+ "order by teacher.id, teacher.name, teacher.sex, teacher.introduction");
 			pStmt.setString(1, pattern);
 			pStmt.setString(2, pattern);
 			pStmt.setString(3, pattern);
@@ -114,7 +140,8 @@ public class QuireRecord {
 			pStmt = conn.prepareStatement(
 					"select class.*, teaches.course_name, teaches.teacher_id, teacher.name, teaches.amount_per_week "
 					+ "from class natural left outer join (teaches join teacher on (teaches.teacher_id = teacher.id)) "
-					+ "where ((class.grade = ?) or (class.class_no = ?) or (teaches.teacher_id like ?) or (teacher.name like ?))");
+					+ "where ((class.grade = ?) or (class.class_no = ?) or (teaches.teacher_id like ?) or (teacher.name like ?)) "
+					+ "order by class.grade, class.class_no");
 			pStmt.setShort(1, numEqual);
 			pStmt.setShort(2, numEqual);
 			pStmt.setString(3, pattern);
@@ -130,6 +157,9 @@ public class QuireRecord {
 		return pStmt.executeQuery();
 	}
 	
+	/*
+	 * 不将查询内容解析成数字进行查询的函数
+	 */
 	private ResultSet stmtQuiryNonNumResolve() throws SQLException {
 		String pattern = "%" + quiryContent + "%";
 		PreparedStatement pStmt = null;
@@ -142,7 +172,8 @@ public class QuireRecord {
 					+ "left outer join able_to_teach on (teacher.id = able_to_teach.teacher_id)) "
 					+ "left outer join teaches on (teacher.id = teaches.teacher_id) "
 					+ "where ((teacher.id like ?) or (teacher.name like ?) or (teacher.sex like ?) or (phone_no.phone_no like ?) "
-					+ "or (able_to_teach.course_name like ?) or (teaches.course_name like ?))");
+					+ "or (able_to_teach.course_name like ?) or (teaches.course_name like ?)) "
+					+ "order by teacher.id, teacher.name, teacher.sex, teacher.introduction");
 			pStmt.setString(1, pattern);
 			pStmt.setString(2, pattern);
 			pStmt.setString(3, pattern);
@@ -170,7 +201,8 @@ public class QuireRecord {
 			pStmt = conn.prepareStatement(
 					"select class.*, teaches.course_name, teaches.teacher_id, teacher.name, teaches.amount_per_week "
 					+ "from class natural left outer join (teaches join teacher on (teaches.teacher_id = teacher.id)) "
-					+ "where ((teaches.teacher_id like ?) or (teacher.name like ?))");
+					+ "where ((teaches.teacher_id like ?) or (teacher.name like ?)) "
+					+ "order by class.grade, class.class_no");
 			pStmt.setString(1, pattern);
 			pStmt.setString(2, pattern);
 			break;
@@ -181,42 +213,6 @@ public class QuireRecord {
 			break;
 		}
 		return pStmt.executeQuery();
-	}
-	
-	
-	
-	//TODO 此方法被用于早期调试，现在已经被抛弃。在本模块功能完备之后，应删去此方法。
-	private void oQuirySpecialClassroom() {
-		
-		ResultSet resultSet = null;
-		QuiryResultMsg quiryResultMsg = null;
-		try {
-			int numEqual = Integer.parseInt(quiryContent);
-			String pattern = "%" + quiryContent + "%";
-			PreparedStatement pStmt = conn.prepareStatement(
-					"select * from special_classroom where ((category like ?) or (room_no = ?))");
-			pStmt.setString(1, pattern);
-			pStmt.setInt(2, numEqual);
-			resultSet = pStmt.executeQuery();
-			quiryResultMsg = new QuiryResultMsg(resultSet);
-		}catch(NumberFormatException e) {
-			String pattern = "%" + quiryContent + "%";
-			try {
-				PreparedStatement pStmt = conn.prepareStatement(
-						"select * from special_classroom where category like ?");
-				pStmt.setString(1, pattern);
-				resultSet = pStmt.executeQuery();
-				quiryResultMsg = new QuiryResultMsg(resultSet);
-			} catch (SQLException e1) {
-				quiryResultMsg = new QuiryResultMsg("数据库异常，请稍后再试");
-				e1.printStackTrace();
-			}
-		} catch (SQLException e) {
-			quiryResultMsg = new QuiryResultMsg("数据库异常，请稍后再试");
-			e.printStackTrace();
-		}
-		socketServer.sendData(quiryResultMsg);
-		
 	}
 	
 }
