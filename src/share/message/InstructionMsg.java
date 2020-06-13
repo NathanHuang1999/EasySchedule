@@ -11,6 +11,7 @@ import java.io.Serializable;
 public class InstructionMsg implements Serializable{
 	
 	public static final int QUIRE_RECORD = 1;
+	public static final int DELETE_RECORD = 2;
 	
 	private int type = 0;
 	private Object instruction = null;

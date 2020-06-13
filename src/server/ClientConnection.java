@@ -1,19 +1,22 @@
 package server;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.Connection;
 
+import server.business.DeleteRecord;
 import server.business.QuireRecord;
+import share.instruction.InstDeleteRecord;
 import share.instruction.InstQuireRecord;
 import share.message.InstructionMsg;
-import share.message.LoginFeedback;
+import share.message.SimpleFeedbackMsg;
 import share.message.User;
 
 /**
  * 一个用于管理一个客户端-服务器连接的类
  * @author huang
- * @date 2020-06-02
+ * @date 2020-06-13
  *
  */
 public class ClientConnection {
@@ -33,17 +36,30 @@ public class ClientConnection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Boolean loginSuccess = login();
-		if(loginSuccess) {
+		Boolean[] authority = login();
+		if(authority[0]) {
 			loginSuccessReturnMsg();
 			while(!closeConnection) {
 				// TODO 此处应有从服务器端接收并解析命令的模块
-				InstructionMsg msg = (InstructionMsg)socketServer.recvDataObj();
-				switch(msg.getType()) {
-				case InstructionMsg.QUIRE_RECORD:
-					QuireRecord busiQuireRecord = new QuireRecord((InstQuireRecord)msg.getInstruction(), socketServer, conn);
+				Object msg = socketServer.recvDataObj();
+				InstructionMsg inst = null;
+				if(msg != null) {
+					inst = (InstructionMsg)msg;
+					switch(inst.getType()) {
+					case InstructionMsg.QUIRE_RECORD:
+						QuireRecord busiQuireRecord = new QuireRecord((InstQuireRecord)inst.getInstruction(), conn);
+						socketServer.sendData(busiQuireRecord.getQuiryResultMsg());
+						break;
+					case InstructionMsg.DELETE_RECORD:
+						DeleteRecord busiDeleteRecord = new DeleteRecord((InstDeleteRecord)inst.getInstruction(), conn, authority[1]);
+						socketServer.sendData(busiDeleteRecord.getFeedBackMsg());
+						break;
+					}
+				}else {
+					closeConnection = true;
 				}
 			}
+			socketServer.closeClient();
 		}else {
 			loginFailCloseConnection();
 		}
@@ -54,8 +70,9 @@ public class ClientConnection {
 	 * 用于处理客户端登录的函数。用户验证部分尚未完成，在之后的迭代中再完成
 	 * @return 若登录成功返回true，否则返回false
 	 */
-	private Boolean login() {
-		Boolean loginSuccess = null;
+	private Boolean[] login() {
+		//Boolean loginSuccess = null;
+		Boolean[] authority = new Boolean[2];
 		//接收登录信息
 		Object obj = socketServer.recvDataObj();
 		//将对象转换为User类型
@@ -64,27 +81,32 @@ public class ClientConnection {
 		String userPassword = user.getPassword();
 		// TODO 用户信息验证，目前这小段代码仅用来调试
 		if(userAccount.equals("abc") && userPassword.equals("123")) {
-			loginSuccess = true;
+			authority[0] = true;
+			authority[1] = true;
+		}else if(userAccount.equals("def") && userPassword.equals("456")){
+			authority[0] = true;
+			authority[1] = false;
 		}else {
-			loginSuccess = false;
+			authority[0] = false;
+			authority[1] = false;
 		}
-		return loginSuccess;
+		return authority;
 	}
 	
 	/**
 	 * 用于在客户端登录成功时返回成功信息的函数
 	 */
 	public void loginSuccessReturnMsg() {
-		LoginFeedback loginFeedback = new LoginFeedback(true, null);
-		socketServer.sendData(loginFeedback);
+		SimpleFeedbackMsg simpleFeedbackMsg = new SimpleFeedbackMsg(true, null);
+		socketServer.sendData(simpleFeedbackMsg);
 	}
 	
 	/**
 	 * 用于在客户端登录失败时返回失败信息并关闭socket的函数
 	 */
 	private void loginFailCloseConnection() {
-		LoginFeedback loginFeedback = new LoginFeedback(false, "用户名或密码错误");
-        socketServer.sendData(loginFeedback);
+		SimpleFeedbackMsg simpleFeedbackMsg = new SimpleFeedbackMsg(false, "用户名或密码错误");
+        socketServer.sendData(simpleFeedbackMsg);
         socketServer.closeClient();
 	}
 

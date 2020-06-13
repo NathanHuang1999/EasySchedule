@@ -3,7 +3,7 @@ package client.uiLogic;
 import client.SocketClient;
 import client.ui.FrameLogin;
 import client.ui.FrameMain;
-import share.message.LoginFeedback;
+import share.message.SimpleFeedbackMsg;
 import share.message.User;
 
 /**
@@ -35,15 +35,15 @@ public class LogicLogin {
 		/**
 		 * 获取服务器的反馈信息并处理
 		 */
-		LoginFeedback loginFeedback = (LoginFeedback) socket.recvDataObj();				
-		if(loginFeedback.getPermission()) {
+		SimpleFeedbackMsg simpleFeedbackMsg = (SimpleFeedbackMsg) socket.recvDataObj();				
+		if(simpleFeedbackMsg.getPermission()) {
 			FrameMain frameMain = new FrameMain();
 			LogicMain logicMain = new LogicMain(socket);
 			frameMain.setLogicController(logicMain);
 			logicMain.setUIController(frameMain);
 			frameMain.setVisible(true);
 		}else {
-			errorMsg = loginFeedback.getErrorMsg();
+			errorMsg = simpleFeedbackMsg.getTextMsg();
 			cond = 1;
 		}
 		return cond;

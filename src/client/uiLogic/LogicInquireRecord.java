@@ -1,23 +1,21 @@
 package client.uiLogic;
 
 import java.awt.CardLayout;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
 import javax.swing.JPanel;
-import javax.swing.table.AbstractTableModel;
-
 import client.SocketClient;
+import client.ui.FramePopUpWindow;
 import client.ui.PanelInquireRecord;
+import client.ui.PanelInquireRecordResult;
+import share.instruction.InstDeleteRecord;
 import share.instruction.InstQuireRecord;
 import share.message.InstructionMsg;
 import share.message.QuiryResultMsg;
+import share.message.SimpleFeedbackMsg;
 
 /**
  * 查询/修改记录的界面逻辑
  * @author huang
- * @date 2020-06-02
+ * @date 2020-06-04
  *
  */
 public class LogicInquireRecord {
@@ -27,6 +25,7 @@ public class LogicInquireRecord {
 	
 	private LogicMain logicFather = null;
 	private PanelInquireRecord uiController = null;
+	private PanelInquireRecordResult uiControllerTwo = null;
 	
 	private SocketClient socket = null;
 	
@@ -35,6 +34,7 @@ public class LogicInquireRecord {
 	
 	private String categorySelect = null; 
 	private String quiryContent = null;
+	private QuiryResultMsg quiryResultMsg = null;
 
 	public LogicInquireRecord(LogicMain logicFather) {
 		this.logicFather = logicFather;
@@ -60,13 +60,31 @@ public class LogicInquireRecord {
 		/**
 		 * 获取服务器的反馈信息并处理
 		 */
-		QuiryResultMsg quiryResultMsg = (QuiryResultMsg)socket.recvDataObj();
+		quiryResultMsg = (QuiryResultMsg)socket.recvDataObj();
 		
 		//TODO 待修改
 		if(quiryResultMsg.getQuirySuccess()) {
 			uiController.fillTable(quiryResultMsg);
-			
 		}
+		
+	}
+	
+	public void delete(int rowIndex) {
+		int length = quiryResultMsg.getColumnCount();
+		Object[] items = new Object[length];
+		for(int i=0; i<length; i++) {
+			items[i] = quiryResultMsg.getValueAt(rowIndex, i);
+		}
+		InstDeleteRecord delete = new InstDeleteRecord(quiryResultMsg.getQuiryType(), items);
+		socket.sendData(new InstructionMsg(InstructionMsg.DELETE_RECORD, delete));
+		/**
+		 * 获取服务器的反馈信息并处理
+		 */
+		SimpleFeedbackMsg feedbackMsg = (SimpleFeedbackMsg)socket.recvDataObj();
+		FramePopUpWindow popUp = new FramePopUpWindow("系统提示", feedbackMsg.getTextMsg());
+		popUp.setVisible(true);
+		if(feedbackMsg.getPermission()) 
+			quire(quiryContent);
 		
 	}
 	

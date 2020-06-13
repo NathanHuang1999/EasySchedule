@@ -11,15 +11,16 @@ import javax.swing.table.AbstractTableModel;
 /**
  * 用于返回查询请求的结果的类
  * @author huang
- * @date 2020-06-03
+ * @date 2020-06-12
  *
  */
 public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 
+	private String quiryType = null;
+	private String quiryContent = null;
+	
 	private Boolean quirySuccess = null;
 	private String errorMsg = null;
-	private String category = null;
-	
 	private int pointer = -1;
 	private int attributeNumber = 0;
 	private int recordNumber = 0;
@@ -32,6 +33,12 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 	private ArrayList<Integer> columnType = new ArrayList<Integer>();
 	
 	private int[] grouping = null;
+	private ArrayList<Integer> groupingCount = null;
+	private ArrayList<Integer> groupingStart = null;
+	private Boolean[] isChangeable = null;
+	private Boolean[] isBigText = null;
+	private String[] groupTitle = null;
+	
 	private ArrayList<ArrayList<ArrayList<Integer>>> resolveCube = new ArrayList<ArrayList<ArrayList<Integer>>>();
 	
 	
@@ -40,9 +47,10 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 		this.errorMsg = errorMsg;
 	}
 
-	public QuiryResultMsg(ResultSet resultSet, int[] grouping) throws Exception {
+	public QuiryResultMsg(String quiryType, String quiryContent, ResultSet resultSet, int[] grouping) throws Exception {
 		
 		quirySuccess = true;
+		this.quiryType = quiryType;
 		this.grouping = grouping;
 		ResultSetMetaData metaData = resultSet.getMetaData();
 		//获取列数
@@ -89,11 +97,12 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 				}
 			}
 		}
-		//当结果集非空时，处理多值问题
-		multiValueHandle();
+		//当结果集非空时，处理多值问题 放弃的设计
+		//multiValueHandle();
 		
 	}
 	
+	/* 放弃的设计
 	private void multiValueHandle() throws Exception {
 		if(recordNumber != 0) {
 			
@@ -116,8 +125,8 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 			}else {
 				//若属性中存在多值属性，则运行这个分支
 				int maxGroup = grouping[grouping.length-1];
-				ArrayList<Integer> groupingCount = new ArrayList<Integer>(maxGroup+1);
-				ArrayList<Integer> groupingStart = new ArrayList<Integer>(maxGroup+1);
+				groupingCount = new ArrayList<Integer>(maxGroup+1);
+				groupingStart = new ArrayList<Integer>(maxGroup+1);
 				for(int i=0; i<maxGroup+1; i++) {
 					groupingCount.add(0);
 					groupingStart.add(-1);
@@ -166,7 +175,7 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 					}
 					//判断newg0和g0是否相等
 					if(g0.equals(newg0)) {
-						//TODO 当newg0和g0相等时，即单值/主要属性相同时，进入此分支以进行多值属性整合
+						//当newg0和g0相等时，即单值/主要属性相同时，进入此分支以进行多值属性整合
 						for(int j=0; j<maxGroup; j++) {
 							if(!gx.get(j).contains(newgx.get(j))){
 								gx.get(j).add(newgx.get(j));
@@ -195,6 +204,7 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 			}
 		}
 	}
+	*/
 	
 	public Boolean getQuirySuccess() {
 		return quirySuccess;
@@ -202,6 +212,38 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 	
 	public String getErrorMsg() {
 		return errorMsg;
+	}
+	
+	public String getQuiryType() {
+		return quiryType;
+	}
+	
+	public String getQuiryContent() {
+		return this.quiryContent;
+	}
+	
+	public void setIsChangeable(Boolean[] changeableArray) {
+		this.isChangeable = changeableArray;
+	}
+	
+	public void setIsBigText(Boolean[] bigTextArray) {
+		this.isBigText = bigTextArray;
+	}
+	
+	public void setGroupTitle(String[] groupTitle) {
+		this.groupTitle = groupTitle;
+	}
+	
+	public Boolean[] getIsChangeable() {
+		return isChangeable;
+	}
+	
+	public Boolean[] getIsBigText() {
+		return isBigText;
+	}
+	
+	public String[] getGroupTitle() {
+		return groupTitle;
 	}
 	
 	public Boolean next() {
@@ -224,6 +266,10 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 		if(type == 0) throw new SQLException("Type of the column is not String");
 		return columnString.get(relocalizeTable.get(index)[1]).get(pointer);
 	}
+	
+	public int[] getGrouping() {
+		return grouping;
+	}
 
 	@Override
 	public String getColumnName(int columnIndex) {
@@ -237,9 +283,17 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 
 	@Override
 	public int getRowCount() {
+		return recordNumber;
+	}
+	
+	/* 放弃的设计
+	@Override
+	public int getRowCount() {
 		return resolveCube.size();
 	}
+	*/
 
+	/* 放弃的设计
 	@Override
 	public Object getValueAt(int rindex, int cindex) {
 		
@@ -252,6 +306,24 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 			break;
 		case 1:
 			value = columnString.get(relocalizeTable.get(cindex)[1]).get(realRIndex);
+			break;
+		}
+		return value;
+		
+	}
+	*/
+	
+	@Override
+	public Object getValueAt(int rindex, int cindex) {
+		
+		int type = relocalizeTable.get(cindex)[0];
+		Object value = null;
+		switch(type) {
+		case 0:
+			value = columnSmallInt.get(relocalizeTable.get(cindex)[1]).get(rindex);
+			break;
+		case 1:
+			value = columnString.get(relocalizeTable.get(cindex)[1]).get(rindex);
 			break;
 		}
 		return value;

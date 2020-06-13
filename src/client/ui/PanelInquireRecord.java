@@ -3,6 +3,7 @@ package client.ui;
 import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.SpringLayout;
@@ -16,6 +17,7 @@ import client.uiLogic.LogicMain;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import java.awt.Color;
@@ -29,7 +31,7 @@ import java.awt.event.ActionEvent;
 /**
  * 查询/修改记录的界面
  * @author huang
- * @date 2020-06-02
+ * @date 2020-06-12
  *
  */
 public class PanelInquireRecord extends JPanel {
@@ -40,10 +42,14 @@ public class PanelInquireRecord extends JPanel {
 	private JTextField textFieldQuiry = null;  //文本输入框
 	private JButton buttonInquiry = null;  //查询按钮
 	private JTable tableShowInquiry = null;
+	private JPopupMenu popupMenu = null;
 	private JTableHeader tableHeader = null;
 	private JComboBox comboBoxCategorySelect = null;  //查询类型选框
 	private JLabel labelAdvancedQuiry = null;  //高级查询选项
 	private JButton buttonCloseThisTab = null;
+	
+	private int deleteFocusRow = -1;
+	private int changeFocusRow = -1;
 	
 	private String[] AdvancedQuiryItem = null;
 
@@ -86,7 +92,13 @@ public class PanelInquireRecord extends JPanel {
 		springLayout.putConstraint(SpringLayout.NORTH, tableShowInquiry, 143, SpringLayout.NORTH, this);
 		springLayout.putConstraint(SpringLayout.WEST, tableShowInquiry, 23, SpringLayout.WEST, this);
 		springLayout.putConstraint(SpringLayout.EAST, tableShowInquiry, -23, SpringLayout.EAST, this);
+		tableShowInquiry.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+            	mouseRightButtonClick(evt);
+            }
+		});
 		add(tableShowInquiry);
+		createPopupMenu();
 
 		//文本输入框设定
 		springLayout.putConstraint(SpringLayout.NORTH, textFieldQuiry, 40, SpringLayout.NORTH, this);
@@ -115,12 +127,22 @@ public class PanelInquireRecord extends JPanel {
 		springLayout.putConstraint(SpringLayout.WEST, comboBoxCategorySelect, 0, SpringLayout.WEST, tableShowInquiry);
 		springLayout.putConstraint(SpringLayout.SOUTH, comboBoxCategorySelect, 0, SpringLayout.SOUTH, textFieldQuiry);
 		springLayout.putConstraint(SpringLayout.EAST, comboBoxCategorySelect, -5, SpringLayout.WEST, textFieldQuiry);
+		/* 放弃的设计
 		comboBoxCategorySelect.addItem("-请选择-");
 		comboBoxCategorySelect.addItem("教师");
 		comboBoxCategorySelect.addItem("教学安排");
 		comboBoxCategorySelect.addItem("课程");
 		comboBoxCategorySelect.addItem("班级");
 		comboBoxCategorySelect.addItem("特殊教室");
+		*/
+		comboBoxCategorySelect.addItem("-请选择-");
+		comboBoxCategorySelect.addItem("教师");
+		comboBoxCategorySelect.addItem("教学安排");
+		comboBoxCategorySelect.addItem("课程");
+		comboBoxCategorySelect.addItem("班级");
+		comboBoxCategorySelect.addItem("特殊教室");
+		comboBoxCategorySelect.addItem("电话号码");
+		comboBoxCategorySelect.addItem("老师能够教学的课程");
 		add(comboBoxCategorySelect);
 		
 		//高级查询选项设定
@@ -169,4 +191,36 @@ public class PanelInquireRecord extends JPanel {
 		springLayout.putConstraint(SpringLayout.EAST, tableHeader, 0, SpringLayout.EAST, tableShowInquiry);
 		add(tableHeader);
 	}
+	
+	//鼠标右键点击事件
+    private void mouseRightButtonClick(MouseEvent evt) {
+        //判断是否为鼠标的BUTTON3按钮，BUTTON3为鼠标右键
+        if (evt.getButton() == java.awt.event.MouseEvent.BUTTON3) {
+            //通过点击位置找到点击为表格中的行
+            int focusedRowIndex = tableShowInquiry.rowAtPoint(evt.getPoint());
+            if (focusedRowIndex == -1) {
+                return;
+            }
+            deleteFocusRow = focusedRowIndex;
+            //将表格所选项设为当前右键点击的行
+            tableShowInquiry.setRowSelectionInterval(focusedRowIndex, focusedRowIndex);
+            //弹出菜单
+            popupMenu.show(tableShowInquiry, evt.getX(), evt.getY());
+        }
+ 
+    }
+	
+	private void createPopupMenu() {
+		
+		popupMenu = new JPopupMenu();
+        JMenuItem delMenItem = new JMenuItem();
+        delMenItem.setText(" 删除 ");
+        delMenItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                //TODO 该操作需要做的事
+            	logicController.delete(deleteFocusRow);
+            }
+        });
+        popupMenu.add(delMenItem);
+    }
 }

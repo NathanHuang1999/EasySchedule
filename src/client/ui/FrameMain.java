@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 
 import javax.swing.Icon;
 import javax.swing.JFrame;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
@@ -32,7 +33,8 @@ import javax.swing.JTabbedPane;
 public class FrameMain extends JFrame {
 
 	private LogicMain logicController = null;
-	private JTabbedPane PanelTabbedBackground = null;
+	private JPanel contentPanel = null;
+	private JTabbedPane panelTabbedBackground = null;
 	
 	/**
 	 * Create the frame.
@@ -96,8 +98,15 @@ public class FrameMain extends JFrame {
 		JMenuItem menuItemAbout = new JMenuItem("关于");
 		menuHelp.add(menuItemAbout);
 		
-		PanelTabbedBackground = new JTabbedPane(JTabbedPane.LEFT);
-		getContentPane().add(PanelTabbedBackground, BorderLayout.CENTER);
+		//contentPanel = new JLayeredPane();
+		//contentPanel = new JPanel();
+		//setContentPane(contentPanel);
+		//PanelTabbedBackground = new JTabbedPane(JTabbedPane.LEFT);
+		//contentPanel.add(PanelTabbedBackground, new Integer(1));
+		//contentPanel.add(PanelTabbedBackground);
+		
+		panelTabbedBackground = new JTabbedPane(JTabbedPane.LEFT);
+		getContentPane().add(panelTabbedBackground, BorderLayout.CENTER);
 		
 	}
 
@@ -109,7 +118,18 @@ public class FrameMain extends JFrame {
 	 * @param tip 页面注释
 	 */
 	public void addTabbedPanel(String tabName, Icon icon, JPanel newTabbedPanel, String tip) {
-		PanelTabbedBackground.addTab(tabName, icon, newTabbedPanel, tip);
+		panelTabbedBackground.addTab(tabName, icon, newTabbedPanel, tip);
+	}
+	
+	/**
+	 * 在主界面上关闭标签页面
+	 * @param tabbedPanel 标签页对象
+	 */
+	public void removeTabbedPanel(JPanel tabbedPanel) {
+		int i = panelTabbedBackground.indexOfComponent(tabbedPanel);
+	    if (i != -1) {
+	    	panelTabbedBackground.remove(i);
+	    }
 	}
 	
 	public void setLogicController(LogicMain logicController) {
