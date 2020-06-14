@@ -13,12 +13,29 @@ import share.message.QuiryResultMsg;
 /**
  * 服务器中用来处理查询记录事务的类，目前尚不完善
  * @author huang
- * @date 2020-06-13
+ * @date 2020-06-14
  *
  */
 public class QuireRecord {
 
 	private Connection conn = null;
+	
+	public static final int TEACHER = 0;
+	public static final int TEACHES = 1;
+	public static final int COURSE = 2;
+	public static final int CLASS = 3;
+	public static final int SPECIAL_CLASSROOM = 4;
+	public static final int PHONE_NO = 5;
+	public static final int ABLE_TO_TEACH = 6;
+	
+	public static final int[][] tableSQLType = {
+			{java.sql.Types.VARCHAR,java.sql.Types.VARCHAR,java.sql.Types.CHAR,java.sql.Types.VARCHAR},
+			{java.sql.Types.SMALLINT,java.sql.Types.SMALLINT,java.sql.Types.VARCHAR,java.sql.Types.VARCHAR,java.sql.Types.SMALLINT},
+			{java.sql.Types.VARCHAR,java.sql.Types.CHAR,java.sql.Types.VARCHAR,java.sql.Types.SMALLINT},
+			{java.sql.Types.SMALLINT,java.sql.Types.SMALLINT},
+			{java.sql.Types.VARCHAR,java.sql.Types.SMALLINT},
+			{java.sql.Types.VARCHAR,java.sql.Types.VARCHAR},
+			{java.sql.Types.VARCHAR,java.sql.Types.VARCHAR,java.sql.Types.VARCHAR}};
 	
 	private String category;
 	private String quiryContent;
@@ -343,5 +360,36 @@ public class QuireRecord {
 		return pStmt.executeQuery();
 	}
 	*/
+	
+	public static void prepStmtSetWithNull(int type, PreparedStatement pStmt, Object[] record, int stmtStart, int recordStart) throws SQLException {
+		
+		for(int i=0; i<QuireRecord.tableSQLType[type].length; i++) {
+			
+			switch(QuireRecord.tableSQLType[type][i]) {
+			case java.sql.Types.VARCHAR:
+				String contentV = (String)record[recordStart+i];
+				if(contentV.equals(""))
+					pStmt.setNull(stmtStart+i+1, java.sql.Types.VARCHAR);
+				else
+					pStmt.setString(stmtStart+i+1, contentV);
+				break;
+			case java.sql.Types.CHAR:
+				String contentC = (String)record[recordStart+i];
+				if(contentC.equals(""))
+					pStmt.setNull(stmtStart+i+1, java.sql.Types.VARCHAR);
+				else
+					pStmt.setString(stmtStart+i+1, contentC);
+				break;
+			case java.sql.Types.SMALLINT:
+				short contentS = (short)record[recordStart+i];
+				if(contentS == (short)-1)
+					pStmt.setNull(stmtStart+i+1, java.sql.Types.SMALLINT);
+				else
+					pStmt.setShort(stmtStart+i+1, contentS);
+				break;
+			}
+		}
+		
+	}
 	
 }

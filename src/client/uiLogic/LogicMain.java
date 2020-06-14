@@ -13,7 +13,7 @@ import client.ui.PanelInquireRecordResult;
 /**
  * 程序主界面逻辑
  * @author huang
- * @date 2020-06-12
+ * @date 2020-06-13
  *
  */
 public class LogicMain {
@@ -33,11 +33,10 @@ public class LogicMain {
 		
 		LogicInquireRecord logicInquireRecord = new LogicInquireRecord(this);
 		PanelInquireRecord panelInquireRecord = new PanelInquireRecord(logicInquireRecord);
-		//PanelInquireRecordResult panelInquireRecordResult = new PanelInquireRecordResult();
 		
-		JPanel panelSwitch = new JPanel(new CardLayout());
+		CardLayout cardLayout = new CardLayout();
+		JPanel panelSwitch = new JPanel(cardLayout);
 		panelSwitch.add("inquire", panelInquireRecord);
-		//panelSwitch.add("result", panelInquireRecordResult);
 
 		logicInquireRecord.setUIController(panelInquireRecord);
 		logicInquireRecord.setBackgroundPanel(panelSwitch);

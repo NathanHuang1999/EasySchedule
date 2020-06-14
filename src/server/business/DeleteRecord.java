@@ -4,14 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import share.instruction.InstDeleteRecord;
+import share.instruction.InstUpDelInsRecord;
 import share.message.QuiryResultMsg;
 import share.message.SimpleFeedbackMsg;
 
 /**
- * 服务器中用来处理删除记录事务的类，目前尚不完善
+ * 服务器中用来处理删除记录事务的类
  * @author huang
- * @date 2020-06-13
+ * @date 2020-06-14
  *
  */
 public class DeleteRecord {
@@ -23,10 +23,10 @@ public class DeleteRecord {
 	
 	private SimpleFeedbackMsg feedBackMsg = null;
 	
-	public DeleteRecord(InstDeleteRecord instruction, Connection conn, Boolean authority) {
+	public DeleteRecord(InstUpDelInsRecord instruction, Connection conn, Boolean authority) {
 		
 		this.conn = conn;
-		category = instruction.getDeleteType();
+		category = instruction.getRecordType();
 		record = instruction.getRecordItems();
 		
 		if(authority) {
@@ -50,32 +50,22 @@ public class DeleteRecord {
 		switch(category) {
 		case "教师":
 			pStmt = conn.prepareStatement(
-					"delete from teacher "
-					+ "where id = ? and name = ? and sex = ? and introduction = ?");
+					"delete from teacher where id = ?");
 			pStmt.setString(1, (String)record[0]);
-			pStmt.setString(2, (String)record[1]);
-			pStmt.setString(3, (String)record[2]);
-			pStmt.setString(4, (String)record[3]);
 			break;
 		case "教学安排":
 			pStmt = conn.prepareStatement(
 					"delete from teaches "
-					+ "where grade = ? and class_no = ? and course_name = ? and "
-					+ "teacher_id = ? and amount_per_week = ?");
+					+ "where grade = ? and class_no = ? and course_name = ? and teacher_id = ?");
 			pStmt.setShort(1, (short)record[0]);
 			pStmt.setShort(2, (short)record[1]);
 			pStmt.setString(3, (String)record[2]);
-			pStmt.setString(4, (String)record[3]);
-			pStmt.setShort(5, (short)record[4]);			
+			pStmt.setString(4, (String)record[3]);	
 			break;
 		case "课程":
 			pStmt = conn.prepareStatement(
-					"delete from course where name = ? and category = ? "
-					+ "and special_classroom_category = ? and special_classroom_no = ?");
+					"delete from course where name = ?");
 			pStmt.setString(1, (String)record[0]);
-			pStmt.setString(2, (String)record[1]);
-			pStmt.setString(3, (String)record[2]);
-			pStmt.setShort(4, (short)record[3]);
 			break;
 		case "班级":
 			pStmt = conn.prepareStatement(
@@ -97,13 +87,12 @@ public class DeleteRecord {
 			break;
 		case "老师能够教学的课程":
 			pStmt = conn.prepareStatement(
-					"delete from able_to_teach where teacher_id = ? and "
-					+ "course_name = ? and ability = ?");
+					"delete from able_to_teach where teacher_id = ? and course_name = ?");
 			pStmt.setString(1, (String)record[0]);
 			pStmt.setString(2, (String)record[1]);
-			pStmt.setString(3, (String)record[2]);
 			break;
 		}
+		System.out.println(pStmt);
 		int sqlReturn = pStmt.executeUpdate();
 		if(sqlReturn > 0) {
 			feedBackMsg = new SimpleFeedbackMsg(true, "删除成功！此次操作影响到共" + sqlReturn + "条记录");

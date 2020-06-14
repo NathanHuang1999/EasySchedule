@@ -27,6 +27,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.SwingConstants;
 
 /**
  * 查询/修改记录的界面
@@ -48,8 +49,7 @@ public class PanelInquireRecord extends JPanel {
 	private JLabel labelAdvancedQuiry = null;  //高级查询选项
 	private JButton buttonCloseThisTab = null;
 	
-	private int deleteFocusRow = -1;
-	private int changeFocusRow = -1;
+	private int focusRow = -1;
 	
 	private String[] AdvancedQuiryItem = null;
 
@@ -201,7 +201,7 @@ public class PanelInquireRecord extends JPanel {
             if (focusedRowIndex == -1) {
                 return;
             }
-            deleteFocusRow = focusedRowIndex;
+            focusRow = focusedRowIndex;
             //将表格所选项设为当前右键点击的行
             tableShowInquiry.setRowSelectionInterval(focusedRowIndex, focusedRowIndex);
             //弹出菜单
@@ -213,12 +213,21 @@ public class PanelInquireRecord extends JPanel {
 	private void createPopupMenu() {
 		
 		popupMenu = new JPopupMenu();
+		
+		JMenuItem updateMenItem = new JMenuItem();
+        updateMenItem.setText(" 修改 ");
+        updateMenItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+            	logicController.getIntoUpdatePanel(focusRow);
+            }
+        });
+        popupMenu.add(updateMenItem);
+        
         JMenuItem delMenItem = new JMenuItem();
         delMenItem.setText(" 删除 ");
-        delMenItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                //TODO 该操作需要做的事
-            	logicController.delete(deleteFocusRow);
+        delMenItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+            	logicController.delete(focusRow);
             }
         });
         popupMenu.add(delMenItem);

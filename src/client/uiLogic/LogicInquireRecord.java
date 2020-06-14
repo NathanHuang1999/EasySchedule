@@ -6,7 +6,7 @@ import client.SocketClient;
 import client.ui.FramePopUpWindow;
 import client.ui.PanelInquireRecord;
 import client.ui.PanelInquireRecordResult;
-import share.instruction.InstDeleteRecord;
+import share.instruction.InstUpDelInsRecord;
 import share.instruction.InstQuireRecord;
 import share.message.InstructionMsg;
 import share.message.QuiryResultMsg;
@@ -15,7 +15,7 @@ import share.message.SimpleFeedbackMsg;
 /**
  * 查询/修改记录的界面逻辑
  * @author huang
- * @date 2020-06-04
+ * @date 2020-06-14
  *
  */
 public class LogicInquireRecord {
@@ -51,7 +51,12 @@ public class LogicInquireRecord {
 		}
 	}
 	
+	
 	//TODO 目前没有增加高级搜索功能
+	/**
+	 * 查询功能
+	 * @param quiryContent 查询内容
+	 */
 	public void quire(String quiryContent) {
 		this.quiryContent = quiryContent;
 		if(categorySelect.equals("-请选择-")) return;
@@ -69,13 +74,17 @@ public class LogicInquireRecord {
 		
 	}
 	
+	/**
+	 * 删除功能
+	 * @param rowIndex 需要删除的记录在表格中的行号
+	 */
 	public void delete(int rowIndex) {
 		int length = quiryResultMsg.getColumnCount();
 		Object[] items = new Object[length];
 		for(int i=0; i<length; i++) {
 			items[i] = quiryResultMsg.getValueAt(rowIndex, i);
 		}
-		InstDeleteRecord delete = new InstDeleteRecord(quiryResultMsg.getQuiryType(), items);
+		InstUpDelInsRecord delete = new InstUpDelInsRecord(quiryResultMsg.getQuiryType(), items);
 		socket.sendData(new InstructionMsg(InstructionMsg.DELETE_RECORD, delete));
 		/**
 		 * 获取服务器的反馈信息并处理
@@ -85,6 +94,74 @@ public class LogicInquireRecord {
 		popUp.setVisible(true);
 		if(feedbackMsg.getPermission()) 
 			quire(quiryContent);
+		
+	}
+	
+	public void getIntoUpdatePanel(int rowIndex) {
+		
+		int length = quiryResultMsg.getColumnCount();
+		
+		String[] attrName = new String[length];
+		Object[] oldRecord = new Object[length];
+		
+		for(int i=0; i<length; i++) {
+			attrName[i] = quiryResultMsg.getColumnName(i);
+			oldRecord[i] = quiryResultMsg.getValueAt(rowIndex, i);
+		}
+		
+		uiControllerTwo = new PanelInquireRecordResult(attrName, oldRecord);
+		uiControllerTwo.setLogicController(this);
+		backgroundPanel.add("update", uiControllerTwo);
+		card.show(backgroundPanel, "update");
+		
+	}
+	
+	public void update(Object[] oldAndNewRecord) {
+		
+		Boolean isSame = true;
+		int attrNumber = oldAndNewRecord.length/2;
+		for(int i=0; i<attrNumber; i++) {
+			if(quiryResultMsg.getAttrType()[i] == 0) {
+				try {
+					oldAndNewRecord[i+attrNumber] = (short)Integer.parseInt((String)oldAndNewRecord[i+attrNumber]);
+					if((short)oldAndNewRecord[i] != (short)oldAndNewRecord[i+attrNumber]) {
+						isSame = false;
+					}
+				}catch(NumberFormatException e) {
+					uiControllerTwo.showPopUpWindow("系统提示", "修改失败！第" + (i+1) +"个属性的格式错误，应为数字！");
+					return;
+				}
+			}else if(quiryResultMsg.getAttrType()[i] == 1) {
+				if(oldAndNewRecord[i] == null)
+					oldAndNewRecord[i] = "";
+				else
+					oldAndNewRecord[i] = (String)oldAndNewRecord[i];
+				if(((String)oldAndNewRecord[i+attrNumber]).equals("null"))
+					oldAndNewRecord[i+attrNumber] = "";
+				else
+					oldAndNewRecord[i+attrNumber] = (String)oldAndNewRecord[i+attrNumber];
+				if(!oldAndNewRecord[i].equals(oldAndNewRecord[i+attrNumber])) {
+					isSame = false;
+				}
+			}
+		}
+		
+		if(isSame) {
+			uiControllerTwo.showPopUpWindow("系统提示", "您没有改变任何内容！");
+		}else {
+			InstUpDelInsRecord update = new InstUpDelInsRecord(quiryResultMsg.getQuiryType(), oldAndNewRecord);
+			socket.sendData(new InstructionMsg(InstructionMsg.UPDATE_RECORD, update));
+			/**
+			 * 获取服务器的反馈信息并处理
+			 */
+			SimpleFeedbackMsg feedbackMsg = (SimpleFeedbackMsg)socket.recvDataObj();
+			FramePopUpWindow popUp = new FramePopUpWindow("系统提示", feedbackMsg.getTextMsg());
+			popUp.setVisible(true);
+			if(feedbackMsg.getPermission()) {
+				quire(quiryContent);
+				returnToInquire();
+			}
+		}
 		
 	}
 	
@@ -105,8 +182,9 @@ public class LogicInquireRecord {
 		logicFather.removeTabbedPanel(backgroundPanel);
 	}
 	
-	public void switchPanel(String name) {
-		card.show(backgroundPanel, name);
+	public void returnToInquire() {
+		card.show(backgroundPanel, "Inquire");
+		backgroundPanel.remove(uiControllerTwo);
 	}
 	
 }

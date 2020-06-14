@@ -11,7 +11,7 @@ import javax.swing.table.AbstractTableModel;
 /**
  * 用于返回查询请求的结果的类
  * @author huang
- * @date 2020-06-12
+ * @date 2020-06-13
  *
  */
 public class QuiryResultMsg extends AbstractTableModel implements Serializable{
@@ -344,6 +344,15 @@ public class QuiryResultMsg extends AbstractTableModel implements Serializable{
 		}
 		return value;
 		
+	}
+	
+	public int[] getAttrType() {
+		
+		int[] attrType = new int[attributeNumber];
+		for(int i=0; i<attributeNumber; i++) {
+			attrType[i] = relocalizeTable.get(i)[0];
+		}
+		return attrType;
 	}
 	
 }

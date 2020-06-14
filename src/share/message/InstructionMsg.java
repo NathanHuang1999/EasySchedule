@@ -5,13 +5,14 @@ import java.io.Serializable;
 /**
  * 客户端向服务器发送的指令消息类
  * @author huang
- * @date 2020-05-28
+ * @date 2020-06-14
  *
  */
 public class InstructionMsg implements Serializable{
 	
 	public static final int QUIRE_RECORD = 1;
 	public static final int DELETE_RECORD = 2;
+	public static final int UPDATE_RECORD = 3;
 	
 	private int type = 0;
 	private Object instruction = null;

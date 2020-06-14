@@ -7,7 +7,8 @@ import java.sql.Connection;
 
 import server.business.DeleteRecord;
 import server.business.QuireRecord;
-import share.instruction.InstDeleteRecord;
+import server.business.UpdateRecord;
+import share.instruction.InstUpDelInsRecord;
 import share.instruction.InstQuireRecord;
 import share.message.InstructionMsg;
 import share.message.SimpleFeedbackMsg;
@@ -51,9 +52,12 @@ public class ClientConnection {
 						socketServer.sendData(busiQuireRecord.getQuiryResultMsg());
 						break;
 					case InstructionMsg.DELETE_RECORD:
-						DeleteRecord busiDeleteRecord = new DeleteRecord((InstDeleteRecord)inst.getInstruction(), conn, authority[1]);
+						DeleteRecord busiDeleteRecord = new DeleteRecord((InstUpDelInsRecord)inst.getInstruction(), conn, authority[1]);
 						socketServer.sendData(busiDeleteRecord.getFeedBackMsg());
 						break;
+					case InstructionMsg.UPDATE_RECORD:
+						UpdateRecord busiUpdateRecord = new UpdateRecord((InstUpDelInsRecord)inst.getInstruction(), conn, authority[1]);
+						socketServer.sendData(busiUpdateRecord.getFeedBackMsg());
 					}
 				}else {
 					closeConnection = true;
@@ -68,7 +72,7 @@ public class ClientConnection {
 	
 	/**
 	 * 用于处理客户端登录的函数。用户验证部分尚未完成，在之后的迭代中再完成
-	 * @return 若登录成功返回true，否则返回false
+	 * @return 返回一个两元素的Boolean型数组，第一个元素代表是否允许登录，第二个元素代表是否有更新/删除/新增数据库记录的权限
 	 */
 	private Boolean[] login() {
 		//Boolean loginSuccess = null;
