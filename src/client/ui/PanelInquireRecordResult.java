@@ -19,7 +19,7 @@ import java.awt.event.ActionEvent;
 /**
  * 用于详细展示查询结果的类
  * @author huang
- * @date 2020-06-13
+ * @date 2020-06-15
  *
  */
 public class PanelInquireRecordResult extends JPanel {
@@ -57,7 +57,8 @@ public class PanelInquireRecordResult extends JPanel {
 			add(labels[i]);
 			
 			textFields[i] = new JTextField();
-			textFields[i].setText(String.valueOf(oldRecord[i]));
+			if(oldRecord != null)
+				textFields[i].setText(String.valueOf(oldRecord[i]));
 			add(textFields[i]);
 			
 		}
@@ -70,19 +71,32 @@ public class PanelInquireRecordResult extends JPanel {
 		});
 		add(buttonReturn);
 		
-		buttonOK = new JButton("确认修改");
+		buttonOK = new JButton();
+		if(oldRecord != null)
+			buttonOK.setText("确认修改");
+		else
+			buttonOK.setText("确认添加");
 		buttonOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
-				Object[] oldAndNewRecord = new Object[attrNumber*2];
-				for(int i=0; i<attrNumber; i++) {
-					oldAndNewRecord[i] = oldRecord[i];
+				if(oldRecord != null) {
+					Object[] oldAndNewRecord = new Object[attrNumber*2];
+					for(int i=0; i<attrNumber; i++) {
+						oldAndNewRecord[i] = oldRecord[i];
+					}
+					for(int i=attrNumber; i<attrNumber*2; i++) {
+						oldAndNewRecord[i] = textFields[i-attrNumber].getText();
+					}
+					
+					logicController.update(oldAndNewRecord);
+					
+				}else {
+					Object[] newRecord = new Object[attrNumber];
+					for(int i=0; i<attrNumber; i++) {
+						newRecord[i] = textFields[i].getText();
+					}
+					logicController.insert(newRecord);
 				}
-				for(int i=attrNumber; i<attrNumber*2; i++) {
-					oldAndNewRecord[i] = textFields[i-attrNumber].getText();
-				}
-				
-				logicController.update(oldAndNewRecord);
 				
 			}
 		});

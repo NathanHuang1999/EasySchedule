@@ -27,7 +27,7 @@ import javax.swing.JTabbedPane;
 /**
  * 程序主界面UI
  * @author huang
- * @date 2020-05-24
+ * @date 2020-06-15
  *
  */
 public class FrameMain extends JFrame {
@@ -66,16 +66,13 @@ public class FrameMain extends JFrame {
 		JMenu menuRecord = new JMenu("记录");
 		menuBar.add(menuRecord);
 		
-		JMenuItem menuItemInquireRecord = new JMenuItem("查询/修改记录");
+		JMenuItem menuItemInquireRecord = new JMenuItem("查询/处理记录");
 		menuItemInquireRecord.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				logicController.inquireOrUpdateRecord();
 			}
 		});
 		menuRecord.add(menuItemInquireRecord);
-		
-		JMenuItem menuItemAddNewRecord = new JMenuItem("增加新记录");
-		menuRecord.add(menuItemAddNewRecord);
 		
 		JMenu menuSchedule = new JMenu("排课");
 		menuBar.add(menuSchedule);

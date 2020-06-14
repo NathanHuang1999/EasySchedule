@@ -32,7 +32,7 @@ import javax.swing.SwingConstants;
 /**
  * 查询/修改记录的界面
  * @author huang
- * @date 2020-06-12
+ * @date 2020-06-15
  *
  */
 public class PanelInquireRecord extends JPanel {
@@ -67,15 +67,25 @@ public class PanelInquireRecord extends JPanel {
 		
 		//给界面组件赋值
 		textFieldQuiry = new JTextField();
+		springLayout.putConstraint(SpringLayout.NORTH, textFieldQuiry, 40, SpringLayout.NORTH, this);
 		buttonInquiry = new JButton("搜索");
+		springLayout.putConstraint(SpringLayout.WEST, buttonInquiry, 5, SpringLayout.EAST, textFieldQuiry);
+		springLayout.putConstraint(SpringLayout.EAST, buttonInquiry, -23, SpringLayout.EAST, this);
 		buttonInquiry.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				logicController.quire(textFieldQuiry.getText());
 			}
 		});
 		tableShowInquiry = new JTable();
+		springLayout.putConstraint(SpringLayout.SOUTH, textFieldQuiry, -60, SpringLayout.NORTH, tableShowInquiry);
+		
+		
+		//查询结果列表设定
+		springLayout.putConstraint(SpringLayout.SOUTH, tableShowInquiry, -48, SpringLayout.SOUTH, this);
 		tableHeader = tableShowInquiry.getTableHeader();
 		comboBoxCategorySelect = new JComboBox();
+		springLayout.putConstraint(SpringLayout.WEST, comboBoxCategorySelect, 23, SpringLayout.WEST, this);
+		springLayout.putConstraint(SpringLayout.EAST, comboBoxCategorySelect, -5, SpringLayout.WEST, textFieldQuiry);
 		
 		//为查询类型选框添加选择事件
 		comboBoxCategorySelect.addItemListener(new ItemListener() {
@@ -85,10 +95,6 @@ public class PanelInquireRecord extends JPanel {
 				}
 			}
 		});
-		
-		
-		//查询结果列表设定
-		springLayout.putConstraint(SpringLayout.SOUTH, tableShowInquiry, -40, SpringLayout.SOUTH, this);
 		springLayout.putConstraint(SpringLayout.NORTH, tableShowInquiry, 143, SpringLayout.NORTH, this);
 		springLayout.putConstraint(SpringLayout.WEST, tableShowInquiry, 23, SpringLayout.WEST, this);
 		springLayout.putConstraint(SpringLayout.EAST, tableShowInquiry, -23, SpringLayout.EAST, this);
@@ -99,11 +105,7 @@ public class PanelInquireRecord extends JPanel {
 		});
 		add(tableShowInquiry);
 		createPopupMenu();
-
-		//文本输入框设定
-		springLayout.putConstraint(SpringLayout.NORTH, textFieldQuiry, 40, SpringLayout.NORTH, this);
 		springLayout.putConstraint(SpringLayout.WEST, textFieldQuiry, 123, SpringLayout.WEST, this);
-		springLayout.putConstraint(SpringLayout.SOUTH, textFieldQuiry, -60, SpringLayout.NORTH, tableShowInquiry);
 		springLayout.putConstraint(SpringLayout.EAST, textFieldQuiry, -123, SpringLayout.EAST, this);
 		add(textFieldQuiry);
 		textFieldQuiry.setColumns(10);
@@ -118,15 +120,11 @@ public class PanelInquireRecord extends JPanel {
 		//查询按钮设定
 		springLayout.putConstraint(SpringLayout.NORTH, buttonInquiry, 0, SpringLayout.NORTH, textFieldQuiry);
 		springLayout.putConstraint(SpringLayout.SOUTH, buttonInquiry, 0, SpringLayout.SOUTH, textFieldQuiry);
-		springLayout.putConstraint(SpringLayout.WEST, buttonInquiry, 5, SpringLayout.EAST, textFieldQuiry);
-		springLayout.putConstraint(SpringLayout.EAST, buttonInquiry, 0, SpringLayout.EAST, tableShowInquiry);
 		add(buttonInquiry);
 		
 		//查询类型选框设定
 		springLayout.putConstraint(SpringLayout.NORTH, comboBoxCategorySelect, 0, SpringLayout.NORTH, textFieldQuiry);
-		springLayout.putConstraint(SpringLayout.WEST, comboBoxCategorySelect, 0, SpringLayout.WEST, tableShowInquiry);
 		springLayout.putConstraint(SpringLayout.SOUTH, comboBoxCategorySelect, 0, SpringLayout.SOUTH, textFieldQuiry);
-		springLayout.putConstraint(SpringLayout.EAST, comboBoxCategorySelect, -5, SpringLayout.WEST, textFieldQuiry);
 		/* 放弃的设计
 		comboBoxCategorySelect.addItem("-请选择-");
 		comboBoxCategorySelect.addItem("教师");
@@ -147,6 +145,8 @@ public class PanelInquireRecord extends JPanel {
 		
 		//高级查询选项设定
 		labelAdvancedQuiry = new JLabel(">高级搜索");
+		springLayout.putConstraint(SpringLayout.NORTH, labelAdvancedQuiry, 5, SpringLayout.SOUTH, buttonInquiry);
+		springLayout.putConstraint(SpringLayout.SOUTH, labelAdvancedQuiry, -20, SpringLayout.NORTH, tableShowInquiry);
 		labelAdvancedQuiry.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -154,9 +154,7 @@ public class PanelInquireRecord extends JPanel {
 			}
 		});
 		labelAdvancedQuiry.setForeground(new Color(0, 0, 139));
-		springLayout.putConstraint(SpringLayout.NORTH, labelAdvancedQuiry, 5, SpringLayout.SOUTH, buttonInquiry);
 		springLayout.putConstraint(SpringLayout.WEST, labelAdvancedQuiry, 0, SpringLayout.WEST, buttonInquiry);
-		springLayout.putConstraint(SpringLayout.SOUTH, labelAdvancedQuiry, -20, SpringLayout.NORTH, tableShowInquiry);
 		add(labelAdvancedQuiry);
 		
 		buttonCloseThisTab = new JButton("关闭选项卡");
@@ -170,6 +168,18 @@ public class PanelInquireRecord extends JPanel {
 			}
 		});
 		add(buttonCloseThisTab);
+		
+		JButton buttonInsert = new JButton("添加一条记录");
+		buttonInsert.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				logicController.getIntoInsertPanel();
+			}
+		});
+		springLayout.putConstraint(SpringLayout.NORTH, buttonInsert, 10, SpringLayout.SOUTH, tableShowInquiry);
+		springLayout.putConstraint(SpringLayout.SOUTH, buttonInsert, 40, SpringLayout.SOUTH, tableShowInquiry);
+		springLayout.putConstraint(SpringLayout.WEST, buttonInsert, 240, SpringLayout.WEST, tableShowInquiry);
+		springLayout.putConstraint(SpringLayout.EAST, buttonInsert, -240, SpringLayout.EAST, tableShowInquiry);
+		add(buttonInsert);
 		
 	}
 	
@@ -232,4 +242,9 @@ public class PanelInquireRecord extends JPanel {
         });
         popupMenu.add(delMenItem);
     }
+	
+	public void showPopUpWindow(String windowTitle, String textMsg) {
+		FramePopUpWindow popUp = new FramePopUpWindow(windowTitle, textMsg);
+		popUp.setVisible(true);
+	}
 }

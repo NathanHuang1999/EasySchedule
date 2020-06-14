@@ -10,7 +10,7 @@ import share.message.SimpleFeedbackMsg;
 /**
  * 服务器中用来处理更新记录事务的类
  * @author huang
- * @date 2020-06-14
+ * @date 2020-06-15
  *
  */
 public class UpdateRecord {
@@ -101,7 +101,7 @@ public class UpdateRecord {
 			pStmt.setString(5, (String)oldAndNewRecord[1]);
 			break;
 		}
-		System.out.println(pStmt);
+		
 		int sqlReturn = pStmt.executeUpdate();
 		if(sqlReturn > 0) {
 			feedBackMsg = new SimpleFeedbackMsg(true, "修改成功！此次操作影响到共" + sqlReturn + "条记录");

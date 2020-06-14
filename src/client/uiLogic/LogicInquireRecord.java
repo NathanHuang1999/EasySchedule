@@ -15,7 +15,7 @@ import share.message.SimpleFeedbackMsg;
 /**
  * 查询/修改记录的界面逻辑
  * @author huang
- * @date 2020-06-14
+ * @date 2020-06-15
  *
  */
 public class LogicInquireRecord {
@@ -164,6 +164,63 @@ public class LogicInquireRecord {
 		}
 		
 	}
+
+	public void getIntoInsertPanel() {
+		
+		if(quiryResultMsg == null) {
+			uiController.showPopUpWindow("系统提示", "请先查询，然后再添加记录");
+			return;
+		}
+		
+		int length = quiryResultMsg.getColumnCount();
+		
+		String[] attrName = new String[length];
+		
+		for(int i=0; i<length; i++) {
+			attrName[i] = quiryResultMsg.getColumnName(i);
+		}
+		
+		uiControllerTwo = new PanelInquireRecordResult(attrName, null);
+		uiControllerTwo.setLogicController(this);
+		backgroundPanel.add("insert", uiControllerTwo);
+		card.show(backgroundPanel, "insert");
+		
+	}
+	
+	public void insert(Object[] newRecord) {
+		
+		int attrNumber = newRecord.length;
+		
+		for(int i=0; i<attrNumber; i++) {
+			if(quiryResultMsg.getAttrType()[i] == 0) {
+				try {
+					newRecord[i] = (short)Integer.parseInt((String)newRecord[i]);
+				}catch(NumberFormatException e) {
+					uiControllerTwo.showPopUpWindow("系统提示", "添加失败！第" + (i+1) +"个属性的格式错误，应为数字！");
+					return;
+				}
+			}else if(quiryResultMsg.getAttrType()[i] == 1) {
+				if(((String)newRecord[i]).equals("null"))
+					newRecord[i] = "";
+				else
+					newRecord[i] = (String)newRecord[i];
+			}
+		}
+		
+		InstUpDelInsRecord insert = new InstUpDelInsRecord(quiryResultMsg.getQuiryType(), newRecord);
+		socket.sendData(new InstructionMsg(InstructionMsg.INSERT_RECORD, insert));
+		/**
+		 * 获取服务器的反馈信息并处理
+		 */
+		SimpleFeedbackMsg feedbackMsg = (SimpleFeedbackMsg)socket.recvDataObj();
+		FramePopUpWindow popUp = new FramePopUpWindow("系统提示", feedbackMsg.getTextMsg());
+		popUp.setVisible(true);
+		if(feedbackMsg.getPermission()) {
+			quire(quiryContent);
+			returnToInquire();
+		}
+		
+	}
 	
 	public void setBackgroundPanel(JPanel backgroundPanel) {
 		this.backgroundPanel = backgroundPanel;
@@ -186,5 +243,6 @@ public class LogicInquireRecord {
 		card.show(backgroundPanel, "Inquire");
 		backgroundPanel.remove(uiControllerTwo);
 	}
+	
 	
 }

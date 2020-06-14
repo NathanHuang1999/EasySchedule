@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.sql.Connection;
 
 import server.business.DeleteRecord;
+import server.business.InsertRecord;
 import server.business.QuireRecord;
 import server.business.UpdateRecord;
 import share.instruction.InstUpDelInsRecord;
@@ -17,7 +18,7 @@ import share.message.User;
 /**
  * 一个用于管理一个客户端-服务器连接的类
  * @author huang
- * @date 2020-06-13
+ * @date 2020-06-15
  *
  */
 public class ClientConnection {
@@ -58,6 +59,11 @@ public class ClientConnection {
 					case InstructionMsg.UPDATE_RECORD:
 						UpdateRecord busiUpdateRecord = new UpdateRecord((InstUpDelInsRecord)inst.getInstruction(), conn, authority[1]);
 						socketServer.sendData(busiUpdateRecord.getFeedBackMsg());
+						break;
+					case InstructionMsg.INSERT_RECORD:
+						InsertRecord busiInsertRecord = new InsertRecord((InstUpDelInsRecord)inst.getInstruction(), conn, authority[1]);
+						socketServer.sendData(busiInsertRecord.getFeedBackMsg());
+						break;
 					}
 				}else {
 					closeConnection = true;
@@ -75,7 +81,6 @@ public class ClientConnection {
 	 * @return 返回一个两元素的Boolean型数组，第一个元素代表是否允许登录，第二个元素代表是否有更新/删除/新增数据库记录的权限
 	 */
 	private Boolean[] login() {
-		//Boolean loginSuccess = null;
 		Boolean[] authority = new Boolean[2];
 		//接收登录信息
 		Object obj = socketServer.recvDataObj();
