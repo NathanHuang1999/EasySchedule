@@ -27,7 +27,7 @@ import javax.swing.JTabbedPane;
 /**
  * 程序主界面UI
  * @author huang
- * @date 2020-06-15
+ * @date 2020-05-24
  *
  */
 public class FrameMain extends JFrame {
@@ -53,6 +53,12 @@ public class FrameMain extends JFrame {
 		menuBar.add(menuAccount);
 		
 		JMenuItem menuItemCheckAccountInfo = new JMenuItem("查看账户信息");
+		menuItemCheckAccountInfo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FramePopUpWindow popUpWindow = new FramePopUpWindow("系统提示","该模块正在开发中");
+				popUpWindow.setVisible(true);
+			}
+		});
 		menuAccount.add(menuItemCheckAccountInfo);
 		
 		JMenuItem menuItemExit = new JMenuItem("退出系统");
@@ -78,29 +84,52 @@ public class FrameMain extends JFrame {
 		menuBar.add(menuSchedule);
 		
 		JMenuItem menuItemInquireTable = new JMenuItem("查看/修改课表");
+		menuItemInquireTable.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FramePopUpWindow popUpWindow = new FramePopUpWindow("系统提示","该模块正在开发中");
+				popUpWindow.setVisible(true);
+			}
+		});
 		menuSchedule.add(menuItemInquireTable);
 		
 		JMenuItem menuItemAddNewTable = new JMenuItem("新建课表");
+		menuItemAddNewTable.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FramePopUpWindow popUpWindow = new FramePopUpWindow("系统提示","该模块正在开发中");
+				popUpWindow.setVisible(true);
+			}
+		});
 		menuSchedule.add(menuItemAddNewTable);
 		
 		JMenuItem menuItemInquireConstraint = new JMenuItem("查看/修改约束");
+		menuItemInquireConstraint.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FramePopUpWindow popUpWindow = new FramePopUpWindow("系统提示","该模块正在开发中");
+				popUpWindow.setVisible(true);
+			}
+		});
 		menuSchedule.add(menuItemInquireConstraint);
 		
 		JMenuItem menuItemAddNewConstraint = new JMenuItem("新建约束");
+		menuItemAddNewConstraint.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FramePopUpWindow popUpWindow = new FramePopUpWindow("系统提示","该模块正在开发中");
+				popUpWindow.setVisible(true);
+			}
+		});
 		menuSchedule.add(menuItemAddNewConstraint);
 		
 		JMenu menuHelp = new JMenu("帮助");
 		menuBar.add(menuHelp);
 		
 		JMenuItem menuItemAbout = new JMenuItem("关于");
+		menuItemAbout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FramePopUpWindow popUpWindow = new FramePopUpWindow("关于","易排课 version 0.1.2");
+				popUpWindow.setVisible(true);
+			}
+		});
 		menuHelp.add(menuItemAbout);
-		
-		//contentPanel = new JLayeredPane();
-		//contentPanel = new JPanel();
-		//setContentPane(contentPanel);
-		//PanelTabbedBackground = new JTabbedPane(JTabbedPane.LEFT);
-		//contentPanel.add(PanelTabbedBackground, new Integer(1));
-		//contentPanel.add(PanelTabbedBackground);
 		
 		panelTabbedBackground = new JTabbedPane(JTabbedPane.LEFT);
 		getContentPane().add(panelTabbedBackground, BorderLayout.CENTER);

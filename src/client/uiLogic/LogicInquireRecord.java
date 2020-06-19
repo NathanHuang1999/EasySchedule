@@ -15,7 +15,7 @@ import share.message.SimpleFeedbackMsg;
 /**
  * 查询/修改记录的界面逻辑
  * @author huang
- * @date 2020-06-15
+ * @date 2020-06-14
  *
  */
 public class LogicInquireRecord {
