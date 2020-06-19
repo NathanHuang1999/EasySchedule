@@ -3,12 +3,16 @@ package server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.sql.*;
+
+import server.business.Scheduler;
 
 /**
  * 服务器的程序入口类
  * @author huang
- * @date 2020-06-02
+ * @date 2020-06-19
  * 
  */
 public class Main {
@@ -22,13 +26,22 @@ public class Main {
 		Main main = new Main(); 
 		
 		//尝试连接本地的Mysql服务器
-		main.connectMysqlServer(); 
+		int port = main.setUpServer(); 
 		//建立socket，等待客户端连接
-		SocketServer server = new SocketServer(12000); 
-		System.out.println("正在等待客户端连接");
-		while(true) {
-			ClientConnection clientConnection = new ClientConnection(server, main.getConnection());
-		}
+		ServerSocket server;
+		try {
+			server = new ServerSocket(port);
+			System.out.println("正在等待客户端连接");
+			while(true) {
+				Socket newClient = server.accept();
+				ClientConnection clientConnection = new ClientConnection(newClient, main.getConnection());
+				clientConnection.start();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
 		 
 
 	}
@@ -43,12 +56,15 @@ public class Main {
 	/**
 	 * 服务器尝试建立与mysql服务器的连接
 	 */
-	private void connectMysqlServer() {
+	private int setUpServer() {
 		Boolean accessSuccess = false; 
+		int port = 0;
 		String sqlPassword;
 		while(!accessSuccess) {
 			try {
 				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+				System.out.println("请输入服务器端口号：");
+				port = Integer.parseInt(br.readLine());
 				System.out.println("请输入mysql客户端的用户名：");
 				sqlAccount = br.readLine();
 				System.out.println("请输入mysql客户端的密码：");
@@ -72,8 +88,11 @@ public class Main {
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (NumberFormatException e) {
+				System.out.println("端口号格式错误，请重新输入！");
 			}
 		}
+		return port;
 	}
 	
 	public Connection getConnection() {

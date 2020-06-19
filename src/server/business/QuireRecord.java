@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import server.SocketServer;
 import share.instruction.InstQuireRecord;
 import share.message.QuiryResultMsg;
 
